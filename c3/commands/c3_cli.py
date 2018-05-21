@@ -19,5 +19,5 @@ def main(c3username, c3apikey, verbose, level):
     pass
 
 
-main.add_command(group_batch.batch)
-main.add_command(group_single.single)
+main.add_command(group_batch.create)
+main.add_command(group_single.query)
