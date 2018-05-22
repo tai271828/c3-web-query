@@ -17,4 +17,3 @@ def create(algorithm, certificate):
     click.echo('Creating a pool...')
     click.echo('Algorithm to pick up systems: %s' % algorithm)
     click.echo('Filter - Certify status : %s' % certificate)
-

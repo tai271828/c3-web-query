@@ -14,8 +14,9 @@ from c3.commands.single import commands as group_single
 @click.option('--verbose', default=1,
               help='Verbose level, the lower the fewer message output.')
 @click.option('--level', default=1,
-              help='Review level, the lower number means lower pass threshold.')
+              help='Review level, the lower number, lower pass threshold.')
 def main(c3username, c3apikey, verbose, level):
+    # TODO: how do i pass these global conf var
     pass
 
 
