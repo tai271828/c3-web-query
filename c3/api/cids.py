@@ -172,6 +172,39 @@ def generate_csv(result, csv_file):
             writer.writerow({'CID': cid,
                              'Release': ""})
 
+
+def get_location_api_by_location(location='Taipei'):
+    """
+    Get location api by location name.
+
+    :param location: string, e.g. Taipei
+    :return: str, location api
+    """
+    configuration = c3.config.Configuration.get_instance()
+    api_location = configuration.config['API']['location']
+
+    lookup_table = {'taipei': '13'}
+    location = location.lower()
+    api_location = api_location + lookup_table[location]
+
+    return api_location
+
+def get_certificates_by_location(location='Taipei'):
+    """
+    Get certificate information and the associated information by location api.
+
+    :param location: string, e.g. Taipei
+    :return: results
+    """
+    print("Get certificates by the specified location: %s" % location)
+    configuration = c3.config.Configuration.get_instance()
+    c3url = configuration.config['C3']['URI']
+    api_location = get_location_api_by_location(location)
+    api = APIQuery(c3url)
+
+    return api.batch_query(c3url + api_location, params=request_params)
+
+
 def go():
     global C3URL, API, api
     configuration = c3.config.Configuration.get_instance()
@@ -183,8 +216,9 @@ def go():
         writer.writeheader()
 
     try:
-        print('Begin to query. This will take around 3 minutes. Please be patient...')
-        results = api.batch_query(C3URL + API, params=request_params)
+        print('Begin to query. ')
+        print('This will take around 3 minutes. Please be patient...')
+        results = get_certificates_by_location('taipei')
         for result in results:
             generate_csv(result, CSV_FILE)
     except QueryError:
