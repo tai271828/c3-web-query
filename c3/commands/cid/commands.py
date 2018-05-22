@@ -19,5 +19,4 @@ def show_cid(location, certificate, enablement):
     Create a test pool by given categories.
     """
     cids.go()
-    #pass
 

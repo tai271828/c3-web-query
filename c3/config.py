@@ -1,7 +1,6 @@
 """
 Global config singlet.
 """
-import os
 import pkg_resources
 import logging
 from configparser import ConfigParser
@@ -17,19 +16,14 @@ template = pkg_resources.resource_stream(resource_package, resource_path)
 class Configuration(object):
     __instance = None
 
+    def __init__(self):
+        self.config = None
+
     @classmethod
     def get_instance(cls):
         if not cls.__instance:
             cls.__instance = Configuration()
         return cls.__instance
-
-    # def fallback(key):
-    #     try:
-    #         if conf_file and config['C3']['UserName']:
-    #             logger.info('Use C3USERNAME by the given conf file.')
-    #     except KeyError:
-    #         config['C3']['UserName'] = config_default['C3']['UserName']
-    #         logger.info('No given C3 Username. Use default.ini ')
 
     def read_configuration(self, conf_file=None):
         """

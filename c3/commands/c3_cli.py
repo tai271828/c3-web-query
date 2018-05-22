@@ -24,7 +24,7 @@ logger = logging.getLogger('c3_web_query')
 def main(c3username, c3apikey, verbose, conf):
     # TODO: how do i pass these global conf var
     # configuration singlet initialization
-    configuration = config.Configuration()
+    configuration = config.Configuration.get_instance()
     configuration.read_configuration(conf)
     # default value from the configuration file
     if not c3username:
