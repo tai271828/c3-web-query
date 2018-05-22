@@ -35,8 +35,8 @@ def get_location_vendor(cid):
     :param cid: string
     :return: string, string.
     """
-    conf_instance = configuration = c3.config.Configuration.get_instance()
-    hardware_api = conf_instance['API']['hardware']
+    conf_instance = c3.config.Configuration.get_instance()
+    hardware_api = conf_instance.config['API']['hardware']
     result = api.single_query(C3URL + hardware_api + cid , params=request_params)
     if result['location']:
         info_location = result['location'].get('name', 'NA')
@@ -73,7 +73,8 @@ def get_latest_machine_report(cid):
     :param cid: CID, string
     :return:
     """
-    report_api = c3.config.Configuration.get_instance()['API']['reportFind']
+    report_api = c3.config.Configuration.get_instance().config['API'][
+        'reportFind']
     req_params = {"username": USERNAME,
                   "api_key": APIKEY,
                   "canonical_id": cid,
