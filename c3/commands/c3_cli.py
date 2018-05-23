@@ -48,6 +48,7 @@ def main(c3username, c3apikey, verbose, conf):
     print('\tC3 username: %s' % c3username)
     print('\tC3 API KEY: %s' % c3apikey)
     print('\tOutput verbose level: %s' % verbose)
+    print('')
 
 
 main.add_command(group_batch.create)

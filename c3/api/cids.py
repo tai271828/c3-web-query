@@ -4,13 +4,13 @@ Providing CIDs according to different requests
 Get ['CID', 'Release', 'Level', 'Location', 'Vendor'] list by
 querying certificates in Taipei Cert lab.
 """
-import os
 import csv
 import c3.config
 from c3.api.api_utils import APIQuery, QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
-FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer', 'Model', 'Location', 'Vendor']
+FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer',
+              'Model', 'Location', 'Vendor']
 
 api = None
 request_params = None
@@ -27,12 +27,14 @@ def get_location_vendor(cid):
     conf_instance = c3.config.Configuration.get_instance()
     c3url = conf_instance.config['C3']['URI']
     hardware_api = conf_instance.config['API']['hardware']
-    result = api.single_query(c3url + hardware_api + cid ,
+    result = api.single_query(c3url + hardware_api + cid,
                               params=request_params)
     if result['location']:
         info_location = result['location'].get('name', 'NA')
     else:
         info_location = 'NA'
+
+    info_vendor = 'NA'
     if result['platform']:
         if result['platform']['vendor']:
             info_vendor = result['platform']['vendor'].get('name', 'NA')
@@ -85,7 +87,6 @@ def get_latest_machine_report(cid):
     return get_machine_info(machine_report)
 
 
-
 def get_machine_info(machine_report):
     """
     Get machine info
@@ -107,21 +108,6 @@ def get_machine_info(machine_report):
     return rtn_dict
 
 
-def get_submission_of_certificate(json_data):
-    """
-    """
-    # get submission number
-    configuration = c3.config.Configuration.get_instance()
-    submission_api_prefix = configuration['API']['submission']
-    submission_no =  json_data['report'].split("/")[-2]
-    submission_api = submission_api_prefix + submission_no
-    result = api.single_query(C3URL + submission_api, params=request_params)
-    try:
-        return result
-    except:
-        return
-
-
 def generate_csv(result, csv_file):
     """
     Generate CSV with CID-Location-Release-Level information.
@@ -131,7 +117,7 @@ def generate_csv(result, csv_file):
         201404-14986, 12.04 LTS, Certified Pre-install
 
     :param result: result queried
-    :param csvfile: output csvfile
+    :param csv_file: output csvfile
     :return: None
     """
     cid = get_cid(result)
@@ -141,7 +127,6 @@ def generate_csv(result, csv_file):
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
             machine_info = get_latest_machine_report(cid)
-            #get_submission_of_certificate(result)
             print("Updating csv file with data for {}…".format(cid))
             # They are maybe None
             if result['release']:
@@ -174,7 +159,6 @@ def get_location_api_by_location(location='Taipei'):
     :param location: string, e.g. Taipei
     :return: str, location api
     """
-    configuration = c3.config.Configuration.get_instance()
     api_location = configuration.config['API']['location']
 
     # Please note the number 13 means Taipei Cert lab and
@@ -187,6 +171,7 @@ def get_location_api_by_location(location='Taipei'):
 
     return api_location
 
+
 def get_certificates_by_location(location='Taipei'):
     """
     Get certificate information and the associated information by location api.
@@ -195,10 +180,8 @@ def get_certificates_by_location(location='Taipei'):
     :return: results
     """
     print("Get certificates by the specified location: %s" % location)
-    configuration = c3.config.Configuration.get_instance()
     c3url = configuration.config['C3']['URI']
     api_location = get_location_api_by_location(location)
-    api = APIQuery(c3url)
 
     return api.batch_query(c3url + api_location, params=request_params)
 
@@ -224,5 +207,4 @@ def go():
         for result in results:
             generate_csv(result, CSV_FILE)
     except QueryError:
-        print("Problem with C3. Ignoring report for {}…".format(cid))
-        pass
+        print("Problem with C3 Query")
