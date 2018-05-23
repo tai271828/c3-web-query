@@ -9,6 +9,7 @@ import csv
 import c3.config
 import pickle
 import pandas as pd
+import c3.api.query as c3q
 from c3.api.api_utils import APIQuery, QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
@@ -63,53 +64,7 @@ def get_cid_from_cert_lot_result(result):
     return result['machine'].split('/')[-2]
 
 
-def query_latest_machine_report(cid):
-    """
-    Get machine report (from factor etc.) by CID
 
-    :param cid: CID, string
-    :return:
-    """
-    c3username = configuration.config['C3']['UserName']
-    c3apikey = configuration.config['C3']['APIKey']
-    c3url = configuration.config['C3']['URI']
-    report_api = c3.config.Configuration.get_instance().config['API'][
-        'reportFind']
-    req_params = {"username": c3username,
-                  "api_key": c3apikey,
-                  "canonical_id": cid,
-                  "limit": "1",
-                  "order_by": "-created_at"}
-
-    report = api.single_query(c3url + report_api, params=req_params)
-
-    if len(report['objects']) == 0:
-        machine_report = None
-    else:
-        machine_report = report['objects'][0]
-
-    return get_machine_info(machine_report)
-
-
-def get_machine_info(machine_report):
-    """
-    Get machine info
-
-    :param machine_report: input of query_latest_machine_report, a dictionary
-    :return: a dictionary to fill the report list
-    """
-    rtn_dict = {}
-    keys = ['form_factor', 'make', 'model']
-
-    # If there is no submission, machine_report is None
-    if machine_report is None:
-        for key in keys:
-            rtn_dict[key] = "NA"
-    else:
-        for key in keys:
-            rtn_dict[key] = machine_report.get(key, "NA")
-
-    return rtn_dict
 
 
 def generate_csv(result, csv_file):
@@ -131,7 +86,7 @@ def generate_csv(result, csv_file):
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
-            machine_info = query_latest_machine_report(cid)
+            machine_info = c3q.query_latest_machine_report(api, cid)
 
             print("Updating csv file with data for {}…".format(cid))
             # They are maybe None
