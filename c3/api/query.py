@@ -2,12 +2,13 @@
 All api real query action will be collected here.
 """
 import c3.config
-
+import c3.api.api as c3api
 
 configuration = c3.config.Configuration.get_instance()
+api_instance = c3api.API.get_instance()
 
 
-def query_location_vendor(api, request_params, cid):
+def query_location_vendor(cid):
     """
     Get hardware location and vendor's name by CID
 
@@ -17,8 +18,8 @@ def query_location_vendor(api, request_params, cid):
     conf_instance = c3.config.Configuration.get_instance()
     c3url = conf_instance.config['C3']['URI']
     hardware_api = conf_instance.config['API']['hardware']
-    result = api.single_query(c3url + hardware_api + cid,
-                              params=request_params)
+    result = api_instance.api.single_query(c3url + hardware_api + cid,
+                                           params=api_instance.request_params)
 
     if result['location']:
         info_location = result['location'].get('name', 'NA')
@@ -35,23 +36,23 @@ def query_location_vendor(api, request_params, cid):
     return info_location, info_vendor
 
 
-def query_certificates_by_location(api, request_params, location='Taipei'):
+def query_certificates_by_location(location='Taipei'):
     print("Get certificates by the specified location: %s" % location)
     print('This will take around 3 minutes. Please be patient...')
 
     c3url = configuration.config['C3']['URI']
     api_location = get_location_api_by_location(location)
 
-    results = api.batch_query(c3url + api_location, params=request_params)
+    results = api_instance.api.batch_query(c3url + api_location,
+                                           params=api_instance.request_params)
 
     return results
 
 
-def query_latest_machine_report(api, cid):
+def query_latest_machine_report(cid):
     """
     Get machine report (from factor etc.) by CID
 
-    :param api: api object
     :param cid: CID, string
     :return:
     """
@@ -65,7 +66,8 @@ def query_latest_machine_report(api, cid):
                   "limit": "1",
                   "order_by": "-created_at"}
 
-    report = api.single_query(c3url + report_api, params=req_params)
+    report = api_instance.api.single_query(c3url + report_api,
+                                           params=req_params)
 
     if len(report['objects']) == 0:
         machine_report = None

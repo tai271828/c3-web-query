@@ -11,7 +11,7 @@ import pickle
 import pandas as pd
 import c3.api.query as c3q
 import c3.api.api as c3api
-from c3.api.api_utils import APIQuery, QueryError
+from c3.api.api_utils import QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
 FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer',
@@ -50,14 +50,12 @@ def generate_csv(result, csv_file):
     """
     cid = get_cid_from_cert_lot_result(result)
     print("Getting info for {}…".format(cid))
-    input_params = (api_instance.api, api_instance.request_params, cid)
-    info_location, info_vendor = c3q.query_location_vendor(*input_params)
+    info_location, info_vendor = c3q.query_location_vendor(cid)
 
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
-            machine_info = c3q.query_latest_machine_report(api_instance.api,
-                                                           cid)
+            machine_info = c3q.query_latest_machine_report(cid)
 
             print("Updating csv file with data for {}…".format(cid))
             # They are maybe None
@@ -103,9 +101,7 @@ def get_certificates_by_location(location='Taipei'):
                 results = pickle.load(handle)
         except FileNotFoundError:
             print('Cache not found. Fallback to web query.')
-            results = c3q.query_certificates_by_location(api,
-                                                         request_params,
-                                                         location)
+            results = c3q.query_certificates_by_location(location)
 
             with open(pickle_fn, 'wb') as handle:
                 cache_path = os.path.realpath(handle.name)
@@ -113,8 +109,7 @@ def get_certificates_by_location(location='Taipei'):
                 pickle.dump(results, handle)
 
     else:
-        results = c3q.query_certificates_by_location(api,
-                                                     request_params, location)
+        results = c3q.query_certificates_by_location(location)
 
         with open(pickle_fn, 'wb') as handle:
             cache_path = os.path.realpath(handle.name)
