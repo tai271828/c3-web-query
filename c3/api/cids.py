@@ -21,34 +21,6 @@ request_params = None
 configuration = c3.config.Configuration.get_instance()
 
 
-def query_location_vendor(cid):
-    """
-    Get hardware location and vendor's name by CID
-
-    :param cid: string
-    :return: string, string.
-    """
-    conf_instance = c3.config.Configuration.get_instance()
-    c3url = conf_instance.config['C3']['URI']
-    hardware_api = conf_instance.config['API']['hardware']
-    result = api.single_query(c3url + hardware_api + cid,
-                              params=request_params)
-
-    if result['location']:
-        info_location = result['location'].get('name', 'NA')
-    else:
-        info_location = 'NA'
-
-    info_vendor = 'NA'
-    if result['platform']:
-        if result['platform']['vendor']:
-            info_vendor = result['platform']['vendor'].get('name', 'NA')
-    else:
-        info_vendor = 'NA'
-
-    return info_location, info_vendor
-
-
 def get_cid_from_cert_lot_result(result):
     """
     Get CID from a certificate-by-location query result.
@@ -62,9 +34,6 @@ def get_cid_from_cert_lot_result(result):
     :return: string, CID
     """
     return result['machine'].split('/')[-2]
-
-
-
 
 
 def generate_csv(result, csv_file):
@@ -81,7 +50,8 @@ def generate_csv(result, csv_file):
     """
     cid = get_cid_from_cert_lot_result(result)
     print("Getting info for {}…".format(cid))
-    info_location, info_vendor = query_location_vendor(cid)
+    info_location, info_vendor = c3q.query_location_vendor(api,
+                                                           request_params, cid)
 
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
@@ -113,38 +83,6 @@ def generate_csv(result, csv_file):
                              'Release': ""})
 
 
-def get_location_api_by_location(location='Taipei'):
-    """
-    Get location api by location name.
-
-    :param location: string, e.g. Taipei
-    :return: str, location api
-    """
-    api_location = configuration.config['API']['location']
-
-    # Please note the number 13 means Taipei Cert lab and
-    # it changes when the data structure of C3 changes.
-    # It could be the other number. Please use the API doc
-    # to get the number you expected.
-    lookup_table = {'taipei': '13'}
-    location = location.lower()
-    api_location = api_location + lookup_table[location]
-
-    return api_location
-
-
-def query_certificates_by_location(location='Taipei'):
-    print("Get certificates by the specified location: %s" % location)
-    print('This will take around 3 minutes. Please be patient...')
-
-    c3url = configuration.config['C3']['URI']
-    api_location = get_location_api_by_location(location)
-
-    results = api.batch_query(c3url + api_location, params=request_params)
-
-    return results
-
-
 def get_certificates_by_location(location='Taipei'):
     """
     Get certificate information and the associated information by location api.
@@ -164,7 +102,9 @@ def get_certificates_by_location(location='Taipei'):
                 results = pickle.load(handle)
         except FileNotFoundError:
             print('Cache not found. Fallback to web query.')
-            results = query_certificates_by_location(location)
+            results = c3q.query_certificates_by_location(api,
+                                                         request_params,
+                                                         location)
 
             with open(pickle_fn, 'wb') as handle:
                 cache_path = os.path.realpath(handle.name)
@@ -172,7 +112,8 @@ def get_certificates_by_location(location='Taipei'):
                 pickle.dump(results, handle)
 
     else:
-        results = query_certificates_by_location(location)
+        results = c3q.query_certificates_by_location(api,
+                                                     request_params, location)
 
         with open(pickle_fn, 'wb') as handle:
             cache_path = os.path.realpath(handle.name)
