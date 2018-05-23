@@ -10,6 +10,7 @@ import c3.config
 import pickle
 import pandas as pd
 import c3.api.query as c3q
+import c3.api.api as c3api
 from c3.api.api_utils import APIQuery, QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
@@ -19,6 +20,7 @@ FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer',
 api = None
 request_params = None
 configuration = c3.config.Configuration.get_instance()
+api_instance = c3api.API.get_instance()
 
 
 def get_cid_from_cert_lot_result(result):
@@ -125,13 +127,8 @@ def get_certificates_by_location(location='Taipei'):
 
 def go():
     global request_params, api
-    c3url = configuration.config['C3']['URI']
-    c3username = configuration.config['C3']['UserName']
-    c3apikey = configuration.config['C3']['APIKey']
-    api = APIQuery(c3url)
-
-    request_params = {"username": c3username,
-                      "api_key": c3apikey}
+    api = api_instance.api
+    request_params = api_instance.request_params
 
     with open(CSV_FILE, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)

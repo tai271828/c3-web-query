@@ -1,7 +1,9 @@
 import os
 import click
 import logging
-import c3.config as config
+import c3.config as c3config
+import c3.api.api as c3api
+from c3.api.api_utils import APIQuery
 from c3.commands.pool import commands as group_batch
 from c3.commands.single import commands as group_single
 from c3.commands.cid import commands as group_cid
@@ -24,7 +26,7 @@ logger = logging.getLogger('c3_web_query')
 def main(c3username, c3apikey, verbose, conf):
     # TODO: how do i pass these global conf var
     # configuration singlet initialization
-    configuration = config.Configuration.get_instance()
+    configuration = c3config.Configuration.get_instance()
     configuration.read_configuration(conf)
     # default value from the configuration file
     # fallback order: env var > customized conf > default.ini
@@ -37,6 +39,15 @@ def main(c3username, c3apikey, verbose, conf):
         configuration.config['C3']['APIKey'] = c3apikey
     else:
         c3apikey = configuration.config['C3']['APIKey']
+
+    c3url = configuration.config['C3']['URI']
+    api = APIQuery(c3url)
+
+    request_params = {"username": c3username,
+                      "api_key": c3apikey}
+
+    api_instance = c3api.API.get_instance()
+    api_instance.set_api_params(api, request_params)
 
     try:
         verbose = configuration.config['GENERAL']['Verbose']
