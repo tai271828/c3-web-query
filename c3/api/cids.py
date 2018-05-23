@@ -152,6 +152,7 @@ def go():
             if is_certified(summary,
                             '16.04 LTS', 'Enabled', 'Complete - Pass'):
                 #get_cid_component_by_submission(summary)
+                c3q.query_submission(summary['report'].split('/')[-2])
                 generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")

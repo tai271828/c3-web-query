@@ -3,6 +3,7 @@ All api real query action will be collected here.
 """
 import c3.config
 import c3.api.api as c3api
+from c3.api.api_utils import APIQuery
 
 configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
@@ -47,6 +48,17 @@ def query_certificates_by_location(location='Taipei'):
                                            params=api_instance.request_params)
 
     return results
+
+
+def query_submission(submission):
+    c3url = configuration.config['C3']['URI']
+    api_endpoint = configuration.config['API']['machineReport']
+    api_uri = c3url + api_endpoint
+    rp = api_instance.request_params
+    apiq = APIQuery(c3url)
+    machine_report = apiq.single_query(api_uri, params=rp)
+
+    return machine_report
 
 
 def query_latest_machine_report(cid):
