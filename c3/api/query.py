@@ -3,6 +3,7 @@ All api real query action will be collected here.
 """
 import c3.config
 import c3.api.api as c3api
+import requests
 from c3.api.api_utils import APIQuery
 
 configuration = c3.config.Configuration.get_instance()
@@ -55,8 +56,10 @@ def query_submission(submission):
     api_endpoint = configuration.config['API']['machineReport']
     api_uri = c3url + api_endpoint
     rp = api_instance.request_params
-    apiq = APIQuery(c3url)
-    machine_report = apiq.single_query(api_uri, params=rp)
+    #apiq = APIQuery(c3url)
+    #machine_report = apiq.single_query(api_uri, params=rp)
+    # TODO: not sure APIQuery does not work. Use request here instead.
+    machine_report = requests.get(api_uri, params=rp)
 
     return machine_report
 
