@@ -111,7 +111,12 @@ def get_location_api_by_location(location='Taipei'):
     # it changes when the data structure of C3 changes.
     # It could be the other number. Please use the API doc
     # to get the number you expected.
-    lookup_table = {'taipei': '13'}
+    #
+    # 6: Beijing
+    # 12: ce qa lab
+    # 13: Taipei cert lab
+    #
+    lookup_table = {'beijing': '6', 'ceqa': '12', 'taipei': '13'}
     location = location.lower()
     api_location = api_location + lookup_table[location]
 

@@ -89,7 +89,7 @@ def get_certificates_by_location(location='Taipei'):
     :param location: string, e.g. Taipei
     :return: results
     """
-    pickle_fn = 'cert_by_location.pickle'
+    pickle_fn = location.lower() + '.cert_by_location.pickle'
 
     if configuration.config['GENERAL']['cache']:
         print('Trying to find cache to get certificates by location.')
@@ -119,6 +119,19 @@ def get_certificates_by_location(location='Taipei'):
     return results
 
 
+def get_cid_component_by_submission(result):
+    pass
+
+
+def is_certified(summary, release, level, status):
+    if summary['release']['release'] == release and \
+       summary['level'] == level and \
+       summary['status'] == status:
+        return True
+    else:
+        return False
+
+
 def go():
     global request_params, api
     api = api_instance.api
@@ -130,9 +143,15 @@ def go():
 
     try:
         print('Begin to query... ')
-        results = get_certificates_by_location('taipei')
+        summaries_taipei = get_certificates_by_location('taipei')
+        summaries_ceqa = get_certificates_by_location('ceqa')
+        summaries_beijin = get_certificates_by_location('beijing')
+        summaries = summaries_taipei
         print('Get certificate-location result per CIDs')
-        for result in results:
-            generate_csv(result, CSV_FILE)
+        for summary in summaries:
+            if is_certified(summary,
+                            '16.04 LTS', 'Enabled', 'Complete - Pass'):
+                #get_cid_component_by_submission(summary)
+                generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
