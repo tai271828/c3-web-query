@@ -8,6 +8,7 @@ import os
 import csv
 import c3.config
 import pickle
+import pandas as pd
 from c3.api.api_utils import APIQuery, QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
@@ -19,7 +20,7 @@ request_params = None
 configuration = c3.config.Configuration.get_instance()
 
 
-def get_location_vendor(cid):
+def query_location_vendor(cid):
     """
     Get hardware location and vendor's name by CID
 
@@ -31,6 +32,7 @@ def get_location_vendor(cid):
     hardware_api = conf_instance.config['API']['hardware']
     result = api.single_query(c3url + hardware_api + cid,
                               params=request_params)
+
     if result['location']:
         info_location = result['location'].get('name', 'NA')
     else:
@@ -46,9 +48,9 @@ def get_location_vendor(cid):
     return info_location, info_vendor
 
 
-def get_cid(result):
+def get_cid_from_cert_lot_result(result):
     """
-    Get CID from a certificate query result.
+    Get CID from a certificate-by-location query result.
 
     The query looks like:
         '[hardware_api]/201404-14986/'
@@ -122,9 +124,10 @@ def generate_csv(result, csv_file):
     :param csv_file: output csvfile
     :return: None
     """
-    cid = get_cid(result)
+    cid = get_cid_from_cert_lot_result(result)
     print("Getting info for {}…".format(cid))
-    info_location, info_vendor = get_location_vendor(cid)
+    info_location, info_vendor = query_location_vendor(cid)
+
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
