@@ -4,8 +4,10 @@ Providing CIDs according to different requests
 Get ['CID', 'Release', 'Level', 'Location', 'Vendor'] list by
 querying certificates in Taipei Cert lab.
 """
+import os
 import csv
 import c3.config
+import pickle
 from c3.api.api_utils import APIQuery, QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
@@ -172,6 +174,18 @@ def get_location_api_by_location(location='Taipei'):
     return api_location
 
 
+def query_certificates_by_location(location='Taipei'):
+    print("Get certificates by the specified location: %s" % location)
+    print('This will take around 3 minutes. Please be patient...')
+
+    c3url = configuration.config['C3']['URI']
+    api_location = get_location_api_by_location(location)
+
+    results = api.batch_query(c3url + api_location, params=request_params)
+
+    return results
+
+
 def get_certificates_by_location(location='Taipei'):
     """
     Get certificate information and the associated information by location api.
@@ -179,11 +193,34 @@ def get_certificates_by_location(location='Taipei'):
     :param location: string, e.g. Taipei
     :return: results
     """
-    print("Get certificates by the specified location: %s" % location)
-    c3url = configuration.config['C3']['URI']
-    api_location = get_location_api_by_location(location)
+    pickle_fn = 'cert_by_location.pickle'
 
-    return api.batch_query(c3url + api_location, params=request_params)
+    if configuration.config['GENERAL']['cache']:
+        print('Trying to find cache to get certificates by location.')
+
+        try:
+            with open(pickle_fn, 'rb') as handle:
+                cache_path = os.path.realpath(handle.name)
+                print('Found cache. Use cache as {}'.format(cache_path))
+                results = pickle.load(handle)
+        except FileNotFoundError:
+            print('Cache not found. Fallback to web query.')
+            results = query_certificates_by_location(location)
+
+            with open(pickle_fn, 'wb') as handle:
+                cache_path = os.path.realpath(handle.name)
+                print('Save cache at {}'.format(cache_path))
+                pickle.dump(results, handle)
+
+    else:
+        results = query_certificates_by_location(location)
+
+        with open(pickle_fn, 'wb') as handle:
+            cache_path = os.path.realpath(handle.name)
+            print('Save cache at {}'.format(cache_path))
+            pickle.dump(results, handle)
+
+    return results
 
 
 def go():
@@ -201,9 +238,9 @@ def go():
         writer.writeheader()
 
     try:
-        print('Begin to query. ')
-        print('This will take around 3 minutes. Please be patient...')
+        print('Begin to query... ')
         results = get_certificates_by_location('taipei')
+        print('Get certificate-location result per CIDs')
         for result in results:
             generate_csv(result, CSV_FILE)
     except QueryError:
