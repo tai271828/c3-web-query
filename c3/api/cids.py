@@ -63,7 +63,7 @@ def get_cid_from_cert_lot_result(result):
     return result['machine'].split('/')[-2]
 
 
-def get_latest_machine_report(cid):
+def query_latest_machine_report(cid):
     """
     Get machine report (from factor etc.) by CID
 
@@ -95,7 +95,7 @@ def get_machine_info(machine_report):
     """
     Get machine info
 
-    :param machine_report: input of get_latest_machine_report, a dictionary
+    :param machine_report: input of query_latest_machine_report, a dictionary
     :return: a dictionary to fill the report list
     """
     rtn_dict = {}
@@ -131,7 +131,8 @@ def generate_csv(result, csv_file):
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
-            machine_info = get_latest_machine_report(cid)
+            machine_info = query_latest_machine_report(cid)
+
             print("Updating csv file with data for {}…".format(cid))
             # They are maybe None
             if result['release']:
