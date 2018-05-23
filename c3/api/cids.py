@@ -17,8 +17,6 @@ CSV_FILE = 'cid-certification-vendor.csv'
 FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer',
               'Model', 'Location', 'Vendor']
 
-api = None
-request_params = None
 configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
 
@@ -52,13 +50,14 @@ def generate_csv(result, csv_file):
     """
     cid = get_cid_from_cert_lot_result(result)
     print("Getting info for {}…".format(cid))
-    info_location, info_vendor = c3q.query_location_vendor(api,
-                                                           request_params, cid)
+    input_params = (api_instance.api, api_instance.request_params, cid)
+    info_location, info_vendor = c3q.query_location_vendor(*input_params)
 
     with open(csv_file, 'a') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         if result:
-            machine_info = c3q.query_latest_machine_report(api, cid)
+            machine_info = c3q.query_latest_machine_report(api_instance.api,
+                                                           cid)
 
             print("Updating csv file with data for {}…".format(cid))
             # They are maybe None
