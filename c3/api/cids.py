@@ -9,23 +9,12 @@ import csv
 import c3.config
 from c3.api.api_utils import APIQuery, QueryError
 
-
-# Please note the number 13 means Taipei Cert lab and
-# it changes when the data structure of C3 changes.
-# It could be the other number. Please use the API doc
-# to get the number you expected.
-API = None
-USERNAME = os.getenv("C3USERNAME")
-APIKEY = os.getenv("C3APIKEY")
-
 CSV_FILE = 'cid-certification-vendor.csv'
 FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer', 'Model', 'Location', 'Vendor']
 
-
 api = None
-
-request_params = {"username": USERNAME,
-                  "api_key": APIKEY}
+request_params = None
+configuration = c3.config.Configuration.get_instance()
 
 
 def get_location_vendor(cid):
@@ -36,8 +25,10 @@ def get_location_vendor(cid):
     :return: string, string.
     """
     conf_instance = c3.config.Configuration.get_instance()
+    c3url = conf_instance.config['C3']['URI']
     hardware_api = conf_instance.config['API']['hardware']
-    result = api.single_query(C3URL + hardware_api + cid , params=request_params)
+    result = api.single_query(c3url + hardware_api + cid ,
+                              params=request_params)
     if result['location']:
         info_location = result['location'].get('name', 'NA')
     else:
@@ -73,15 +64,18 @@ def get_latest_machine_report(cid):
     :param cid: CID, string
     :return:
     """
+    c3username = configuration.config['C3']['UserName']
+    c3apikey = configuration.config['C3']['APIKey']
+    c3url = configuration.config['C3']['URI']
     report_api = c3.config.Configuration.get_instance().config['API'][
         'reportFind']
-    req_params = {"username": USERNAME,
-                  "api_key": APIKEY,
+    req_params = {"username": c3username,
+                  "api_key": c3apikey,
                   "canonical_id": cid,
                   "limit": "1",
                   "order_by": "-created_at"}
 
-    report = api.single_query(C3URL + report_api, params=req_params)
+    report = api.single_query(c3url + report_api, params=req_params)
 
     if len(report['objects']) == 0:
         machine_report = None
@@ -183,6 +177,10 @@ def get_location_api_by_location(location='Taipei'):
     configuration = c3.config.Configuration.get_instance()
     api_location = configuration.config['API']['location']
 
+    # Please note the number 13 means Taipei Cert lab and
+    # it changes when the data structure of C3 changes.
+    # It could be the other number. Please use the API doc
+    # to get the number you expected.
     lookup_table = {'taipei': '13'}
     location = location.lower()
     api_location = api_location + lookup_table[location]
@@ -206,11 +204,15 @@ def get_certificates_by_location(location='Taipei'):
 
 
 def go():
-    global C3URL, API, api
-    configuration = c3.config.Configuration.get_instance()
-    C3URL = configuration.config['C3']['URI']
-    API = configuration.config['API']['location']
-    api = APIQuery(C3URL)
+    global request_params, api
+    c3url = configuration.config['C3']['URI']
+    c3username = configuration.config['C3']['UserName']
+    c3apikey = configuration.config['C3']['APIKey']
+    api = APIQuery(c3url)
+
+    request_params = {"username": c3username,
+                      "api_key": c3apikey}
+
     with open(CSV_FILE, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         writer.writeheader()

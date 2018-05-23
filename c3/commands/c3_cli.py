@@ -27,10 +27,16 @@ def main(c3username, c3apikey, verbose, conf):
     configuration = config.Configuration.get_instance()
     configuration.read_configuration(conf)
     # default value from the configuration file
-    if not c3username:
-        c3username = configuration.config['C3']['USERNAME']
-    if not c3apikey:
-        c3apikey = configuration.config['C3']['APIKEY']
+    # fallback order: env var > customized conf > default.ini
+    if c3username:
+        configuration.config['C3']['UserName'] = c3username
+    else:
+        c3username = configuration.config['C3']['UserName']
+
+    if c3apikey:
+        configuration.config['C3']['APIKey'] = c3apikey
+    else:
+        c3apikey = configuration.config['C3']['APIKey']
 
     try:
         verbose = configuration.config['GENERAL']['Verbose']
