@@ -4,8 +4,13 @@ All api real query action will be collected here.
 import c3.config
 import c3.api.api as c3api
 import requests
+import logging
 import c3.json.component as c3component
 from c3.api.api_utils import APIQuery
+
+logger = logging.getLogger('c3_web_query')
+format_str = "[ %(funcName)s() ] %(message)s"
+logging.basicConfig(level=logging.INFO, format=format_str)
 
 configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
@@ -79,6 +84,7 @@ def query_submission_devices(submission):
 
 
 def query_submission(submission):
+    logger.info("Start querying")
     c3url = configuration.config['C3']['URI']
     api_endpoint = configuration.config['API']['machineReport'] + \
                    submission + '/'
