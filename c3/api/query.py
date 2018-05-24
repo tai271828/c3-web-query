@@ -82,6 +82,32 @@ def query_submission(submission):
     return response.json()
 
 
+def query_specific_machine_report(m_id):
+    """
+    Get machine report (from factor etc.) by machine report id
+
+    :param m_id: submission / machine report id, string
+    :return:
+    """
+    c3username = configuration.config['C3']['UserName']
+    c3apikey = configuration.config['C3']['APIKey']
+    c3url = configuration.config['C3']['URI']
+    report_api = configuration.config['API']['reportFind']
+    req_params = {"username": c3username,
+                  "api_key": c3apikey,
+                  "id": m_id}
+
+    report = api_instance.api.single_query(c3url + report_api,
+                                           params=req_params)
+
+    if len(report['objects']) == 0:
+        machine_report = None
+    else:
+        machine_report = report['objects'][0]
+
+    return get_machine_info(machine_report)
+
+
 def query_latest_machine_report(cid):
     """
     Get machine report (from factor etc.) by CID
@@ -118,7 +144,8 @@ def get_machine_info(machine_report):
     :return: a dictionary to fill the report list
     """
     rtn_dict = {}
-    keys = ['form_factor', 'make', 'model']
+    keys = ['make', 'model', 'codename', 'form_factor', 'processor',
+            'video', 'wireless', 'network']
 
     # If there is no submission, machine_report is None
     if machine_report is None:
