@@ -51,17 +51,35 @@ def query_certificates_by_location(location='Taipei'):
     return results
 
 
-def query_submission(submission):
+def query_submission_devices(submission):
     c3url = configuration.config['C3']['URI']
-    api_endpoint = configuration.config['API']['machineReport']
+    api_endpoint = configuration.config['API']['machineReport'] + \
+                   submission + '/report_devices/'
     api_uri = c3url + api_endpoint
-    rp = api_instance.request_params
+    #rp = api_instance.request_params
     #apiq = APIQuery(c3url)
     #machine_report = apiq.single_query(api_uri, params=rp)
     # TODO: not sure APIQuery does not work. Use request here instead.
-    machine_report = requests.get(api_uri, params=rp)
+    rp = {'username': configuration.config['C3']['UserName'],
+          'api_key': configuration.config['C3']['APIKey'],
+          'limit': configuration.config['C3']['BatchQueryMode']}
+    response = requests.get(api_uri, params=rp)
 
-    return machine_report
+    return response.json()
+
+
+def query_submission(submission):
+    c3url = configuration.config['C3']['URI']
+    api_endpoint = configuration.config['API']['machineReport'] + \
+                   submission + '/'
+    api_uri = c3url + api_endpoint
+
+    rp = {'username': configuration.config['C3']['UserName'],
+          'api_key': configuration.config['C3']['APIKey'],
+          'limit': configuration.config['C3']['BatchQueryMode']}
+    response = requests.get(api_uri, params=rp)
+
+    return response.json()
 
 
 def query_latest_machine_report(cid):

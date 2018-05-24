@@ -11,6 +11,7 @@ import pickle
 import pandas as pd
 import c3.api.query as c3q
 import c3.api.api as c3api
+import c3.pool.cid as c3cid
 from c3.api.api_utils import QueryError
 
 CSV_FILE = 'cid-certification-vendor.csv'
@@ -151,8 +152,9 @@ def go():
         for summary in summaries:
             if is_certified(summary,
                             '16.04 LTS', 'Enabled', 'Complete - Pass'):
-                #get_cid_component_by_submission(summary)
-                c3q.query_submission(summary['report'].split('/')[-2])
-                generate_csv(summary, CSV_FILE)
+                submission_no = summary['report'].split('/')[-2]
+                submission_report = c3q.query_submission(submission_no)
+                c3cid.get_cid_from_submission(submission_report)
+                #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
