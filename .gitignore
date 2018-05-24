@@ -1,3 +1,4 @@
+*.pickle
 *.csv
 # PyCharm
 .idea/c3-web-query.iml
