@@ -4,6 +4,7 @@ All api real query action will be collected here.
 import c3.config
 import c3.api.api as c3api
 import requests
+import c3.json.component as c3component
 from c3.api.api_utils import APIQuery
 
 configuration = c3.config.Configuration.get_instance()
@@ -52,6 +53,12 @@ def query_certificates_by_location(location='Taipei'):
 
 
 def query_submission_devices(submission):
+    """
+    Return the device information by its submittion ID.
+
+    :param submission: submission ID
+    :return: device report
+    """
     c3url = configuration.config['C3']['URI']
     api_endpoint = configuration.config['API']['machineReport'] + \
                    submission + '/report_devices/'
@@ -63,9 +70,12 @@ def query_submission_devices(submission):
     rp = {'username': configuration.config['C3']['UserName'],
           'api_key': configuration.config['C3']['APIKey'],
           'limit': configuration.config['C3']['BatchQueryMode']}
+
     response = requests.get(api_uri, params=rp)
 
-    return response.json()
+    device_report = response.json()
+
+    return device_report['objects']
 
 
 def query_submission(submission):
@@ -99,6 +109,10 @@ def query_specific_machine_report(m_id):
 
     report = api_instance.api.single_query(c3url + report_api,
                                            params=req_params)
+
+    if not len(report['objects']) == 1:
+        print('Something wrong with the number.')
+        return None
 
     if len(report['objects']) == 0:
         machine_report = None

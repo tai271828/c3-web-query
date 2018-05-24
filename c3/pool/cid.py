@@ -16,7 +16,12 @@ def get_cid_from_submission(submission_report):
     cid = CID()
     #cid = c3meta.get_basic_metadata(submission_report, cid)
     #cid = c3component.get_basic_components(submission_report, cid)
+
     submission_id = submission_report['resource_uri'].split('/')[-2]
+
     machine_report = c3query.query_specific_machine_report(submission_id)
+
+    device_report = c3query.query_submission_devices(submission_id)
+    device_audio = c3component.get_audio_component(device_report)
 
     return cid
