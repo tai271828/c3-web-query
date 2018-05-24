@@ -20,6 +20,8 @@ def get_cid_from_submission(submission_report):
     submission_id = submission_report['resource_uri'].split('/')[-2]
 
     machine_report = c3query.query_specific_machine_report(submission_id)
+    machine_metainfo = c3component.get_machine_info(machine_report)
+
 
     device_report = c3query.query_submission_devices(submission_id)
     device_audio = c3component.get_audio_component(device_report)

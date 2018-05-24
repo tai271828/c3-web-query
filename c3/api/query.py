@@ -119,7 +119,7 @@ def query_specific_machine_report(m_id):
     else:
         machine_report = report['objects'][0]
 
-    return get_machine_info(machine_report)
+    return machine_report
 
 
 def query_latest_machine_report(cid):
@@ -147,29 +147,7 @@ def query_latest_machine_report(cid):
     else:
         machine_report = report['objects'][0]
 
-    return get_machine_info(machine_report)
-
-
-def get_machine_info(machine_report):
-    """
-    Get machine info
-
-    :param machine_report: input of query_latest_machine_report, a dictionary
-    :return: a dictionary to fill the report list
-    """
-    rtn_dict = {}
-    keys = ['make', 'model', 'codename', 'form_factor', 'processor',
-            'video', 'wireless', 'network']
-
-    # If there is no submission, machine_report is None
-    if machine_report is None:
-        for key in keys:
-            rtn_dict[key] = "NA"
-    else:
-        for key in keys:
-            rtn_dict[key] = machine_report.get(key, "NA")
-
-    return rtn_dict
+    return machine_report
 
 
 def get_location_api_by_location(location='Taipei'):
