@@ -87,9 +87,13 @@ def query_submission(submission):
     rp = {'username': configuration.config['C3']['UserName'],
           'api_key': configuration.config['C3']['APIKey'],
           'limit': configuration.config['C3']['BatchQueryMode']}
-    response = requests.get(api_uri, params=rp)
+    #response = requests.get(api_uri, params=rp)
+    #
+    #return response.json()
+    report = api_instance.api.single_query(api_uri, timeout=60,
+                                           params=rp)
 
-    return response.json()
+    return report
 
 
 def query_specific_machine_report(m_id):
