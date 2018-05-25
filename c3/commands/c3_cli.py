@@ -53,12 +53,11 @@ def main(c3username, c3apikey, verbose, conf):
     except KeyError:
         logger.warning('Fallback to default verbose value.')
 
-    print('Configuration:')
-    print('\tUser specified conf file: %s' % conf)
-    print('\tC3 username: %s' % c3username)
-    print('\tC3 API KEY: %s' % c3apikey)
-    print('\tOutput verbose level: %s' % verbose)
-    print('')
+    logging.info('Configuration:')
+    logging.info('User specified conf file: %s' % conf)
+    logging.info('C3 username: %s' % c3username)
+    logging.info('C3 API KEY: %s' % c3apikey)
+    logging.info('Output verbose level: %s' % verbose)
 
 
 main.add_command(group_batch.create)

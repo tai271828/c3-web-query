@@ -44,12 +44,13 @@ class Configuration(object):
         config_default.read(template.name)
 
         if conf_file:
-            logger.info('Reading user specified conf..')
+            logger.info('Reading user specified conf...' )
+            logger.info('Found %s' % conf_file)
             config.read(conf_file)
 
         try:
             if conf_file and config['C3']['UserName']:
-                logger.info('Use C3USERNAME by the given conf file.')
+                logger.info('Override C3USERNAME by the given conf file.')
         except KeyError:
             config['C3']['UserName'] = config_default['C3']['UserName']
             logger.info('No given C3 Username. Use default.ini ')
@@ -61,7 +62,6 @@ class Configuration(object):
             config['C3']['APIKey'] = config_default['C3']['APIKey']
             logger.info('No given C3 API key. Use default.ini')
 
-        print(conf_file)
         try:
             if conf_file and config['GENERAL']['verbose']:
                 logger.info('Override verbose by the given conf file.')
