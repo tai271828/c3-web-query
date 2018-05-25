@@ -84,8 +84,11 @@ def is_certified(summary, release, level, status):
 
 
 def merge_summaries(summaries_not_merge):
-    # TODO: implement me
-    pass
+    rtn_summaries = []
+    for summaries in summaries_not_merge:
+        rtn_summaries.extend(summaries)
+
+    return rtn_summaries
 
 
 def get_cids_by_query(location, certificate, enablement, status, cids):
