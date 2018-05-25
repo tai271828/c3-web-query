@@ -122,10 +122,6 @@ def get_certificates_by_location(location='Taipei'):
     return results
 
 
-def get_cid_component_by_submission(result):
-    pass
-
-
 def is_certified(summary, release, level, status):
     if summary['release']['release'] == release and \
        summary['level'] == level and \
@@ -139,8 +135,8 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
     try:
         print('Begin to query... ')
         summaries_taipei = get_certificates_by_location('taipei')
-        #summaries_ceqa = get_certificates_by_location('ceqa')
-        #summaries_beijin = get_certificates_by_location('beijing')
+        # summaries_ceqa = get_certificates_by_location('ceqa')
+        # summaries_beijin = get_certificates_by_location('beijing')
         summaries = summaries_taipei
         print('Get certificate-location result per CIDs')
         for summary in summaries:
