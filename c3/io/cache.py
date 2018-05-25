@@ -23,6 +23,7 @@ def read_cache(prefix):
 
     return result
 
+
 def write_cache(prefix, result):
     pickle_fn = prefix + '.pickle'
 
@@ -32,4 +33,3 @@ def write_cache(prefix, result):
         cache_path = os.path.realpath(handle.name)
         pickle.dump(result, handle)
         logging.info('Saved cache at %s' % cache_path)
-

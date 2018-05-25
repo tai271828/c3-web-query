@@ -44,7 +44,7 @@ class Configuration(object):
         config_default.read(template.name)
 
         if conf_file:
-            logger.info('Reading user specified conf...' )
+            logger.info('Reading user specified conf...')
             logger.info('Found %s' % conf_file)
             config.read(conf_file)
 

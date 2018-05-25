@@ -5,7 +5,6 @@ import c3.config
 import c3.api.api as c3api
 import requests
 import logging
-from c3.api.api_utils import APIQuery
 
 logger = logging.getLogger('c3_web_query')
 format_str = "[ %(funcName)s() ] %(message)s"
@@ -58,7 +57,7 @@ def query_certificates_by_location(location='Taipei'):
 
 def query_submission_devices(submission):
     """
-    Return the device information by its submittion ID.
+    Return the device information by its submission ID.
 
     :param submission: submission ID
     :return: device report
@@ -67,9 +66,9 @@ def query_submission_devices(submission):
     api_endpoint = configuration.config['API']['machineReport'] + \
                    submission + '/report_devices/'
     api_uri = c3url + api_endpoint
-    #rp = api_instance.request_params
-    #apiq = APIQuery(c3url)
-    #machine_report = apiq.single_query(api_uri, params=rp)
+    # rp = api_instance.request_params
+    # apiq = APIQuery(c3url)
+    # machine_report = apiq.single_query(api_uri, params=rp)
     # TODO: not sure APIQuery does not work. Use request here instead.
     rp = {'username': configuration.config['C3']['UserName'],
           'api_key': configuration.config['C3']['APIKey'],
@@ -89,8 +88,8 @@ def query_submission(submission_id):
     This function will timeout easily, before fixing this. Please use
     query_specific_machine_report instead.
 
-    :param submission:
-    :return:
+    :param submission_id: submission_id, int represented in string
+    :return: report in json
     """
 
     logger.info("Start querying")

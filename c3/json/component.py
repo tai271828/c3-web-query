@@ -1,6 +1,10 @@
 """
 Convert C3 response in json to basic target information.
 """
+import logging
+
+
+logger = logging.getLogger('c3_web_query')
 
 
 def get_basic_components(submission_report):
@@ -30,8 +34,9 @@ def get_audio_component(device_report):
                     rtn_device['audio_pciid'] = device['identifier']
                     rtn_device['audio_name'] = device['name']
                     return rtn_device
-            except:
-                pass
+            except Exception as e:
+                logger.warning(e)
+
     return rtn_device
 
 
