@@ -25,7 +25,7 @@ def create_prototype(algorithm, certificate):
 @click.command()
 @click.option('--location',
               type=click.Choice(['taipei', 'beijing', 'lexington', 'all']),
-              default='all',
+              default='taipei',
               help='Show systems with the given location only')
 @click.option('--certificate',
               type=click.Choice(['14.04.5', '16.04 LTS']),

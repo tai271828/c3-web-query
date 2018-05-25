@@ -9,6 +9,7 @@ import c3.config
 import pickle
 import logging
 import pandas as pd
+import c3.maptable
 import c3.io.cache as c3cache
 import c3.api.query as c3q
 import c3.api.api as c3api
@@ -82,13 +83,24 @@ def is_certified(summary, release, level, status):
         return False
 
 
+def merge_summaries(summaries_not_merge):
+    # TODO: implement me
+    pass
+
+
 def get_cids_by_query(location, certificate, enablement, status, cids):
     try:
         print('Begin to query... ')
-        summaries_taipei = get_certificates_by_location('taipei')
-        # summaries_ceqa = get_certificates_by_location('ceqa')
-        # summaries_beijin = get_certificates_by_location('beijing')
-        summaries = summaries_taipei
+        if location == 'all':
+            summaries_not_merge = []
+            for location_entry in c3.maptable.location:
+                summaries_entry = get_certificates_by_location(location_entry)
+                summaries_not_merge.append(summaries_entry)
+            summaries = merge_summaries(summaries_not_merge)
+
+        else:
+            summaries = get_certificates_by_location(location)
+
         print('Get certificate-location result per CIDs')
         for summary in summaries:
             if is_certified(summary, certificate, enablement, status):
@@ -103,7 +115,6 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
                     cid_obj = c3cid.get_cid_from_submission(submission_id)
                     cid_obj.__dict__.update(cid=cid_id)
                     cids.append(cid_obj)
-                    #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
 
