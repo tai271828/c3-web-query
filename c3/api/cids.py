@@ -8,6 +8,7 @@ import os
 import csv
 import c3.config
 import pickle
+import logging
 import pandas as pd
 import c3.api.query as c3q
 import c3.api.api as c3api
@@ -154,10 +155,13 @@ def go():
                             '16.04 LTS', 'Enabled', 'Complete - Pass'):
                 cid_id = summary['machine'].split('/')[-2]
                 print(cid_id)
-                submission_id = summary['report'].split('/')[-2]
-                # TODO: use query_specific_submission instead
-                # submission_report = c3q.query_submission(submission_id)
-                c3cid.get_cid_from_submission(submission_id)
-                #generate_csv(summary, CSV_FILE)
+                if summary['report'] is None:
+                    logging.warning('This certificate has no submission.')
+                else:
+                    submission_id = summary['report'].split('/')[-2]
+                    # TODO: use query_specific_submission instead
+                    # submission_report = c3q.query_submission(submission_id)
+                    c3cid.get_cid_from_submission(submission_id)
+                    #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
