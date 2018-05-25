@@ -2,6 +2,7 @@
 All api real query action will be collected here.
 """
 import c3.config
+import c3.maptable
 import c3.api.api as c3api
 import requests
 import logging
@@ -189,7 +190,7 @@ def get_location_api_by_location(location='Taipei'):
     # 12: ce qa lab
     # 13: Taipei cert lab
     #
-    lookup_table = {'beijing': '6', 'ceqa': '12', 'taipei': '13'}
+    lookup_table = c3.maptable.location
     location = location.lower()
     api_location = api_location + lookup_table[location]
 
