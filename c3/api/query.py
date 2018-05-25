@@ -78,18 +78,29 @@ def query_submission_devices(submission):
     return device_report['objects']
 
 
-def query_submission(submission):
+def query_submission(submission_id):
+    """
+    Please use query_specific_machine_report instead.
+
+    This function will timeout easily, before fixing this. Please use
+    query_specific_machine_report instead.
+
+    :param submission:
+    :return:
+    """
     c3url = configuration.config['C3']['URI']
     api_endpoint = configuration.config['API']['machineReport'] + \
-                   submission + '/'
+                   submission_id + '/'
     api_uri = c3url + api_endpoint
 
     rp = {'username': configuration.config['C3']['UserName'],
           'api_key': configuration.config['C3']['APIKey'],
           'limit': configuration.config['C3']['BatchQueryMode']}
-    #response = requests.get(api_uri, params=rp)
+
+    # TODO: timeout easily
+    # response = requests.get(api_uri, params=rp)
     #
-    #return response.json()
+    # return response.json()
     report = api_instance.api.single_query(api_uri, timeout=60,
                                            params=rp)
 

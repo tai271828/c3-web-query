@@ -154,9 +154,9 @@ def go():
                             '16.04 LTS', 'Enabled', 'Complete - Pass'):
                 cid_id = summary['machine'].split('/')[-2]
                 print(cid_id)
-                submission_no = summary['report'].split('/')[-2]
-                submission_report = c3q.query_submission(submission_no)
-                c3cid.get_cid_from_submission(submission_report)
+                submission_id = summary['report'].split('/')[-2]
+                #submission_report = c3q.query_submission(submission_id)
+                c3cid.get_cid_from_submission(submission_id)
                 #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")

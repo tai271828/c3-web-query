@@ -20,14 +20,19 @@ def get_components(device_report):
 
 
 def get_audio_component(device_report):
+    rtn_device = {'audio_pciid': 'Unknown pciid',
+                  'audio_name': 'Audio is not found'}
+
     for device in device_report:
         if device['bus'] == 'pci':
             try:
                 if device['category']['name'] == 'AUDIO':
-                    return device['identifier'], device['name']
+                    rtn_device['audio_pciid'] = device['identifier']
+                    rtn_device['audio_name'] = device['name']
+                    return rtn_device
             except:
                 pass
-    return "Unknown pciid", "Audio is not found"
+    return rtn_device
 
 
 def get_machine_info(machine_report):
