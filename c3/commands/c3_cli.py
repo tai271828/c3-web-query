@@ -6,7 +6,6 @@ import c3.api.api as c3api
 from c3.api.api_utils import APIQuery
 from c3.commands.pool import commands as group_batch
 from c3.commands.single import commands as group_single
-from c3.commands.cid import commands as group_cid
 
 
 logger = logging.getLogger('c3_web_query')
@@ -63,5 +62,5 @@ def main(c3username, c3apikey, verbose, conf):
 
 
 main.add_command(group_batch.create)
+main.add_command(group_batch.create_prototype)
 main.add_command(group_single.query)
-main.add_command(group_cid.show_cid)
