@@ -10,6 +10,7 @@ import c3.config
 import pickle
 import logging
 import pandas as pd
+import c3.io.cache as c3cache
 import c3.api.query as c3q
 import c3.api.api as c3api
 import c3.pool.cid as c3cid
@@ -134,20 +135,12 @@ def is_certified(summary, release, level, status):
         return False
 
 
-def get_cids(location, certificate, enablement, status):
-    global request_params, api
-    api = api_instance.api
-    request_params = api_instance.request_params
-
-    with open(CSV_FILE, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
-        writer.writeheader()
-
+def get_cids_by_query(location, certificate, enablement, status, cids):
     try:
         print('Begin to query... ')
         summaries_taipei = get_certificates_by_location('taipei')
-        summaries_ceqa = get_certificates_by_location('ceqa')
-        summaries_beijin = get_certificates_by_location('beijing')
+        #summaries_ceqa = get_certificates_by_location('ceqa')
+        #summaries_beijin = get_certificates_by_location('beijing')
         summaries = summaries_taipei
         print('Get certificate-location result per CIDs')
         for summary in summaries:
@@ -160,7 +153,32 @@ def get_cids(location, certificate, enablement, status):
                     submission_id = summary['report'].split('/')[-2]
                     # TODO: use query_specific_submission instead
                     # submission_report = c3q.query_submission(submission_id)
-                    c3cid.get_cid_from_submission(submission_id)
+                    cids.append(c3cid.get_cid_from_submission(submission_id))
                     #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
+
+    return cids
+
+
+def get_cids(location, certificate, enablement, status):
+    global request_params, api
+    api = api_instance.api
+    request_params = api_instance.request_params
+
+    with open(CSV_FILE, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
+        writer.writeheader()
+
+    # Use cache is possible
+    cids_cache = c3cache.read_cache("cids")
+    if cids_cache:
+        print("Found cids cache. Use it.")
+        cids = cids_cache
+    else:
+        cids = []
+        cids = get_cids_by_query(location, certificate, enablement, status,
+                                 cids)
+        c3cache.write_cache("cids", cids)
+
+    return cids
