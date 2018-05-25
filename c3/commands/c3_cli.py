@@ -1,6 +1,7 @@
 import os
 import click
 import logging
+import pkg_resources
 import c3.config as c3config
 import c3.api.api as c3api
 from c3.api.api_utils import APIQuery
@@ -9,6 +10,11 @@ from c3.commands.single import commands as group_single
 
 
 logger = logging.getLogger('c3_web_query')
+
+resource_package = __name__
+resource_path = '/'.join(('../data', 'default.ini'))
+
+template = pkg_resources.resource_stream(resource_package, resource_path)
 
 
 @click.group()
@@ -26,7 +32,11 @@ def main(c3username, c3apikey, verbose, conf):
     # TODO: how do i pass these global conf var
     # configuration singlet initialization
     configuration = c3config.Configuration.get_instance()
-    configuration.read_configuration(conf)
+    # ready default.ini to get every basic attribute ready
+    configuration.read_configuration(template.name)
+    if conf:
+        logger.info('User customized conf is specified.')
+        configuration.read_configuration(conf)
     # default value from the configuration file
     # fallback order: env var > customized conf > default.ini
     if c3username:
