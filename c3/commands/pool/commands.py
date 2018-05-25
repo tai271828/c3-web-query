@@ -1,5 +1,6 @@
 import click
 import c3.api.cids as cids
+import c3.io.csv as c3csv
 
 
 @click.command()
@@ -38,8 +39,17 @@ def create_prototype(algorithm, certificate):
               type=click.Choice(['Complete - Pass']),
               default='Complete - Pass',
               help='Certificate status')
-def create(location, certificate, enablement, status):
+@click.option('--csv',
+              default=True,
+              help='If to output csv file with name'
+              'location-certificate-enablement-status.csv')
+def create(location, certificate, enablement, status, csv):
     """
     Create a test pool by given categories.
     """
-    cids.get_cids(location, certificate, enablement, status)
+    cids_objs = cids.get_cids(location, certificate, enablement, status)
+    csv_fn = location + '-' + certificate + '-' + enablement + '-' + status
+    csv_fn = csv_fn.replace(' ', '')
+    csv_fn = csv_fn + '.csv'
+    if csv:
+        c3csv.generate_csv(cids_objs, csv_fn)

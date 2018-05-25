@@ -5,7 +5,6 @@ Get ['CID', 'Release', 'Level', 'Location', 'Vendor'] list by
 querying certificates in Taipei Cert lab.
 """
 import os
-import csv
 import c3.config
 import pickle
 import logging
@@ -16,9 +15,6 @@ import c3.api.api as c3api
 import c3.pool.cid as c3cid
 from c3.api.api_utils import QueryError
 
-CSV_FILE = 'cid-certification-vendor.csv'
-FIELDNAMES = ['CID', 'Release', 'Level', 'Form Factor', 'Manufacturer',
-              'Model', 'Location', 'Vendor']
 
 configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
@@ -38,51 +34,6 @@ def get_cid_from_cert_lot_result(result):
     """
     return result['machine'].split('/')[-2]
 
-
-def generate_csv(result, csv_file):
-    """
-    Generate CSV with CID-Location-Release-Level information.
-
-    The csv will looks like:
-        CID Release Level
-        201404-14986, 12.04 LTS, Certified Pre-install
-
-    :param result: result queried
-    :param csv_file: output csvfile
-    :return: None
-    """
-    cid = get_cid_from_cert_lot_result(result)
-    print("Getting info for {}…".format(cid))
-    info_location, info_vendor = c3q.query_location_vendor(cid)
-
-    with open(csv_file, 'a') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
-        if result:
-            machine_info = c3q.query_latest_machine_report(cid)
-
-            print("Updating csv file with data for {}…".format(cid))
-            # They are maybe None
-            if result['release']:
-                info_release = result['release'].get('release', 'NA')
-            else:
-                info_release = 'NA'
-            if result['level']:
-                info_level = result['level']
-            else:
-                info_level = 'NA'
-            writer.writerow({'CID': cid,
-                             'Release': info_release,
-                             'Level': info_level,
-                             'Form Factor': machine_info['form_factor'],
-                             'Manufacturer': machine_info['make'],
-                             'Model': machine_info['model'],
-                             'Location': info_location,
-                             'Vendor': info_vendor
-                             })
-        else:
-            print("No data for {}".format(cid))
-            writer.writerow({'CID': cid,
-                             'Release': ""})
 
 
 def get_certificates_by_location(location='Taipei'):
@@ -149,7 +100,9 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
                     submission_id = summary['report'].split('/')[-2]
                     # TODO: use query_specific_submission instead
                     # submission_report = c3q.query_submission(submission_id)
-                    cids.append(c3cid.get_cid_from_submission(submission_id))
+                    cid_obj = c3cid.get_cid_from_submission(submission_id)
+                    cid_obj.__dict__.update(cid=cid_id)
+                    cids.append(cid_obj)
                     #generate_csv(summary, CSV_FILE)
     except QueryError:
         print("Problem with C3 Query")
@@ -161,10 +114,6 @@ def get_cids(location, certificate, enablement, status):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
-
-    with open(CSV_FILE, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
-        writer.writeheader()
 
     # Use cache is possible
     cids_cache = c3cache.read_cache("cids")
