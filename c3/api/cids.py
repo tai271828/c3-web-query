@@ -134,7 +134,7 @@ def is_certified(summary, release, level, status):
         return False
 
 
-def go():
+def get_cids(location, certificate, enablement, status):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
@@ -151,8 +151,7 @@ def go():
         summaries = summaries_taipei
         print('Get certificate-location result per CIDs')
         for summary in summaries:
-            if is_certified(summary,
-                            '16.04 LTS', 'Enabled', 'Complete - Pass'):
+            if is_certified(summary, certificate, enablement, status):
                 cid_id = summary['machine'].split('/')[-2]
                 print(cid_id)
                 if summary['report'] is None:
