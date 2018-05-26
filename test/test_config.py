@@ -30,6 +30,20 @@ def config_singlet():
 def test_read_default_username(config_singlet):
     assert config_singlet.config['C3']['UserName'] == 'ubuntu'
 
-
 def test_read_default_apikey(config_singlet):
     assert config_singlet.config['C3']['APIKey'] == 'ubuntu'
+
+def test_read_default_batch_query_mode(config_singlet):
+    assert config_singlet.config['C3']['BatchQueryMode'] == '0'
+
+def test_read_default_uri(config_singlet):
+    answer_uri = 'https://certification.canonical.com/'
+    assert config_singlet.config['C3']['URI'] == answer_uri
+
+def test_read_default_verbose(config_singlet):
+    answer = 'info'
+    assert config_singlet.config['GENERAL']['verbose'] == answer
+
+def test_read_default_cache(config_singlet):
+    answer = 'true'
+    assert config_singlet.config['GENERAL']['cache'] == answer
