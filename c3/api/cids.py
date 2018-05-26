@@ -10,12 +10,15 @@ import pickle
 import logging
 import pandas as pd
 import c3.maptable
+import c3.config as c3config
 import c3.io.cache as c3cache
 import c3.api.query as c3q
 import c3.api.api as c3api
 import c3.pool.cid as c3cid
 from c3.api.api_utils import QueryError
 
+
+logger = logging.getLogger('c3_web_query')
 
 configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
@@ -110,7 +113,7 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
                 cid_id = summary['machine'].split('/')[-2]
                 print(cid_id)
                 if summary['report'] is None:
-                    logging.warning('This certificate has no submission.')
+                    logger.warning('This certificate has no submission.')
                 else:
                     submission_id = summary['report'].split('/')[-2]
                     # TODO: use query_specific_submission instead
@@ -128,6 +131,11 @@ def get_cids(location, certificate, enablement, status):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
+
+    verbose_level = configuration.config['GENERAL']['verbose']
+    c3config.set_logger_verbose_level(verbose_level, logger)
+
+    logger.debug('logger begins to debug')
 
     # Use cache is possible
     cids_cache = c3cache.read_cache("cids")

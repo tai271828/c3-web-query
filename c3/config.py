@@ -3,6 +3,7 @@ Global config singlet.
 """
 import pkg_resources
 import logging
+import c3.maptable
 from configparser import ConfigParser
 
 logger = logging.getLogger('c3_web_query')
@@ -73,3 +74,8 @@ class Configuration(object):
             logger.info('No given verbose. Use default.ini')
 
         self.config = config
+
+
+def set_logger_verbose_level(verbose_level, logger):
+    vl = c3.maptable.loglevel[verbose_level]
+    logger.setLevel(vl)

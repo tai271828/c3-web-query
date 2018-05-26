@@ -24,12 +24,15 @@ template = pkg_resources.resource_stream(resource_package, resource_path)
 @click.option('--c3apikey',
               default=lambda: os.environ.get('C3APIKEY', ''),
               help='Your C3 API KEY')
-@click.option('--verbose', default=0,
-              help='Verbose level, the lower the fewer message output.')
+@click.option('--verbose',
+              type=click.Choice(['debug', 'info', 'warning', 'error',
+                                 'critical']),
+              default='info',
+              help='Verbose level corresponding to logging level.')
 @click.option('--conf',
               help='Configuration file.')
 def main(c3username, c3apikey, verbose, conf):
-    # TODO: how do i pass these global conf var
+    # Pass the global options and configuration by the configuration singlet.
     # configuration singlet initialization
     configuration = c3config.Configuration.get_instance()
     # ready default.ini to get every basic attribute ready
