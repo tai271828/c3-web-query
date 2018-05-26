@@ -7,10 +7,12 @@ class MetaInfo(object):
 
     def __init__(self, submission_report):
         self.sub_rpt = submission_report
+        self.cid = None
         self.get_cid()
 
     def get_cid(self):
-        #self.cid = self.sub_rpt['hardware'].split('/')[-2]
+        # This also works but harder to read
+        # self.cid = self.sub_rpt['hardware'].split('/')[-2]
         self.cid = self.sub_rpt['canonical_id']
 
     def dump(self, cid_obj):
@@ -21,7 +23,6 @@ class MetaInfo(object):
         :return: None
         """
         pass
-
 
 
 def get_basic_metadata(submission_report, cid_obj):

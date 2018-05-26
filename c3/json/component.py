@@ -7,22 +7,6 @@ import logging
 logger = logging.getLogger('c3_web_query')
 
 
-def get_basic_components(submission_report):
-    """
-    Get basic components
-
-    :param submission_report: submission report in json
-    :return: CID objects
-    """
-    print(submission_report)
-    pass
-
-
-def get_components(device_report):
-    print(device_report)
-    pass
-
-
 def get_audio_component(device_report):
     rtn_device = {'audio_pciid': 'Unknown pciid',
                   'audio_name': 'Audio is not found'}
