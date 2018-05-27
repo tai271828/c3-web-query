@@ -1,5 +1,6 @@
-import c3.config
 import logging
+import c3.config
+from c3.maptable import comprehensive_cid_attr as cca
 
 
 logger = logging.getLogger('c3_web_query')
@@ -41,9 +42,7 @@ def get_pool(cid_objs):
     flag_all = conf_singlet.config['SHRINK'].getboolean('all')
 
     # Will try to find unique device in the pool
-    device_categories = ['make', 'model', 'codename', 'form_factor',
-                         'processor', 'video', 'wireless', 'network',
-                         'audio_pciid', 'audio_name']
+    device_categories = cca
 
     # Check the configuration to see what shrink filter we are going to use.
     # Remove the filter not found in the configuration.

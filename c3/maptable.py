@@ -14,3 +14,5 @@ machine_metainfo_attr = ['make', 'model', 'codename', 'form_factor',
                          'processor', 'video', 'wireless', 'network']
 
 device_audio_attr = ['audio_pciid', 'audio_name']
+
+comprehensive_cid_attr = machine_metainfo_attr + device_audio_attr
