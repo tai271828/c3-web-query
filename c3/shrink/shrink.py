@@ -15,11 +15,19 @@ def sanity_check(base, target):
         raise Exception
 
 
-def get_unique_devices_in_pool(cid_objs, category):
+def get_unique_devices_in_pool(cid_objs, category, ifamily=False):
+    ifamily_series = c3.maptable.ifamily_series
     devices_in_pool = []
     device_counts_in_pool = {}
     for cid_obj in cid_objs:
         device = getattr(cid_obj, category)
+
+        # group i[3,5,7]-xxxx as i[3,5,7]
+        if ifamily and category == 'processor':
+            for ifamily_type in ifamily_series:
+                if ifamily_type in device.lower():
+                    device = ifamily_type
+
         if device not in devices_in_pool:
             devices_in_pool.append(device)
         if device in device_counts_in_pool.keys():
@@ -41,7 +49,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Find unique devices per category
     category_unique_devices = {}
     for category in device_categories:
-        unique_d_pool = get_unique_devices_in_pool(cid_objs, category)
+        unique_d_pool = get_unique_devices_in_pool(cid_objs, category, ifamily)
         category_unique_devices[category] = unique_d_pool
 
     all_unique_devices = []
@@ -50,10 +58,17 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 
     # Begin to shrink
     cid_objs_shrunk = []
+    ifamily_series = c3.maptable.ifamily_series
     for category in device_categories:
         logging.debug("Shrink the pool by %s" % category)
         for cid_obj in cid_objs:
             device = getattr(cid_obj, category)
+
+            if ifamily and category == 'processor':
+                for ifamily_type in ifamily_series:
+                    if ifamily_type in device.lower():
+                        device = ifamily_type
+
             if device in all_unique_devices:
                 cid_objs_shrunk.append(cid_obj)
 
