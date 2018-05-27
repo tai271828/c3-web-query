@@ -55,7 +55,7 @@ def get_pool(cid_objs):
             if conf_singlet.config['SHRINK'].getboolean(category) is None or \
                not conf_singlet.config['SHRINK'].getboolean(category):
                 device_categories.remove(category)
-                logger.warning("No such category %s" % category)
+                logger.warning("Forbid to use category %s" % category)
 
     # Find unique devices per category
     category_unique_devices = {}
