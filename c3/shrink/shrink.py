@@ -77,10 +77,12 @@ def get_pool(cid_objs):
     else:
         logger.info('Begin to remove filters...')
         for category in list(device_categories):
-            # None or False
-            if conf_singlet.config['SHRINK'].getboolean(category) is None or \
-               not conf_singlet.config['SHRINK'].getboolean(category):
+            # None or False, means we don't want to use the filter
+            filter_flag = conf_singlet.config['SHRINK'].getboolean(category)
+            if not filter_flag:
                 device_categories.remove(category)
                 logger.warning("Forbid to use category %s" % category)
 
-    return shrink_by_category(cid_objs, device_categories)
+    cid_objs_shrunk =  shrink_by_category(cid_objs, device_categories)
+
+    return cid_objs_shrunk
