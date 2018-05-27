@@ -13,6 +13,7 @@ def sanity_check(base, target):
     if len(base) != len(target):
         raise Exception
 
+
 def get_unique_devices_in_pool(cid_objs, category):
     devices_in_pool = []
     device_counts_in_pool = {}
@@ -34,12 +35,14 @@ def get_unique_devices_in_pool(cid_objs, category):
 
     return unique_devices_in_pool
 
+
 def get_pool(cid_objs):
     conf_singlet = c3.config.Configuration.get_instance()
     flag_all = conf_singlet.config['SHRINK'].getboolean('all')
 
     # Will try to find unique device in the pool
-    device_categories = ['processor', 'video', 'wireless', 'network',
+    device_categories = ['make', 'model', 'codename', 'form_factor',
+                         'processor', 'video', 'wireless', 'network',
                          'audio_pciid', 'audio_name']
 
     # Check the configuration to see what shrink filter we are going to use.
@@ -48,8 +51,10 @@ def get_pool(cid_objs):
         logger.info('All filter are going to use.')
     else:
         logger.info('Begin to remove filters...')
-        for category in device_categories:
-            if conf_singlet.config['SHRINK'].getboolean(category) is None:
+        for category in list(device_categories):
+            # None or False
+            if conf_singlet.config['SHRINK'].getboolean(category) is None or \
+               not conf_singlet.config['SHRINK'].getboolean(category):
                 device_categories.remove(category)
                 logger.warning("No such category %s" % category)
 
