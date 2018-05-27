@@ -65,5 +65,5 @@ def create(location, certificate, enablement, status,
 
     csv_fn_output_shrank = csv_fn_prefix + '-after-shrink.csv'
 
-    #if csv_after_shrink:
-    #    c3csv.generate_csv(cid_objs_shrank, csv_fn_output_shrank)
+    if csv_after_shrink:
+        c3csv.generate_csv(cid_objs_shrank, csv_fn_output_shrank)
