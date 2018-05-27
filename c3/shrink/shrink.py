@@ -37,26 +37,7 @@ def get_unique_devices_in_pool(cid_objs, category):
     return unique_devices_in_pool
 
 
-def get_pool(cid_objs):
-    conf_singlet = c3.config.Configuration.get_instance()
-    flag_all = conf_singlet.config['SHRINK'].getboolean('all')
-
-    # Will try to find unique device in the pool
-    device_categories = cca
-
-    # Check the configuration to see what shrink filter we are going to use.
-    # Remove the filter not found in the configuration.
-    if flag_all:
-        logger.info('All filter are going to use.')
-    else:
-        logger.info('Begin to remove filters...')
-        for category in list(device_categories):
-            # None or False
-            if conf_singlet.config['SHRINK'].getboolean(category) is None or \
-               not conf_singlet.config['SHRINK'].getboolean(category):
-                device_categories.remove(category)
-                logger.warning("Forbid to use category %s" % category)
-
+def shrink_by_category(cid_objs, device_categories):
     # Find unique devices per category
     category_unique_devices = {}
     for category in device_categories:
@@ -80,3 +61,26 @@ def get_pool(cid_objs):
     print('After shrink:  %i CIDs in the pool' % len(cid_objs_shrunk))
 
     return cid_objs_shrunk
+
+
+def get_pool(cid_objs):
+    conf_singlet = c3.config.Configuration.get_instance()
+    flag_all = conf_singlet.config['SHRINK'].getboolean('all')
+
+    # Will try to find unique device in the pool
+    device_categories = cca
+
+    # Check the configuration to see what shrink filter we are going to use.
+    # Remove the filter not found in the configuration.
+    if flag_all:
+        logger.info('All filter are going to use.')
+    else:
+        logger.info('Begin to remove filters...')
+        for category in list(device_categories):
+            # None or False
+            if conf_singlet.config['SHRINK'].getboolean(category) is None or \
+               not conf_singlet.config['SHRINK'].getboolean(category):
+                device_categories.remove(category)
+                logger.warning("Forbid to use category %s" % category)
+
+    return shrink_by_category(cid_objs, device_categories)
