@@ -1,6 +1,7 @@
 import click
 import c3.api.cids as cids
 import c3.io.csv as c3csv
+from c3.shrink import shrink
 
 
 @click.command()
@@ -39,17 +40,30 @@ def create_prototype(algorithm, certificate):
               type=click.Choice(['Complete - Pass']),
               default='Complete - Pass',
               help='Certificate status')
-@click.option('--csv',
+@click.option('--csv-before-shrink',
               default=True,
               help='If to output csv file with name'
-              'location-certificate-enablement-status.csv')
-def create(location, certificate, enablement, status, csv):
+              'location-certificate-enablement-status-before-shrink.csv')
+@click.option('--csv-after-shrink',
+              default=True,
+              help='If to output csv file with name'
+              'location-certificate-enablement-status-after-shrink.csv')
+def create(location, certificate, enablement, status,
+           csv_before_shrink, csv_after_shrink):
     """
     Create a test pool by given categories.
     """
-    cids_objs = cids.get_cids(location, certificate, enablement, status)
+    cid_objs = cids.get_cids(location, certificate, enablement, status)
+
     csv_fn = location + '-' + certificate + '-' + enablement + '-' + status
-    csv_fn = csv_fn.replace(' ', '')
-    csv_fn = csv_fn + '.csv'
-    if csv:
-        c3csv.generate_csv(cids_objs, csv_fn)
+    csv_fn_prefix = csv_fn.replace(' ', '')
+    csv_fn_output = csv_fn_prefix + '-before-shrink.csv'
+    if csv_before_shrink:
+        c3csv.generate_csv(cid_objs, csv_fn_output)
+
+    cid_objs_shrank = shrink.get_pool(cid_objs)
+
+    csv_fn_output_shrank = csv_fn_prefix + '-after-shrink.csv'
+
+    #if csv_after_shrink:
+    #    c3csv.generate_csv(cid_objs_shrank, csv_fn_output_shrank)

@@ -74,6 +74,14 @@ class Configuration(object):
             config['GENERAL']['verbose'] = config_default['GENERAL']['verbose']
             logger.info('No given verbose. Use default.ini')
 
+        try:
+            if conf_file and config['SHRINK']['all']:
+                logger.info('Override shrink flag by the given conf file')
+        except KeyError:
+            # fallback value
+            config['SHRINK']['all'] = config_default['SHRINK']['all']
+            logger.info('No given shrink flag. Use default.ini')
+
         self.config = config
 
 
