@@ -37,7 +37,7 @@ def get_unique_devices_in_pool(cid_objs, category):
     return unique_devices_in_pool
 
 
-def shrink_by_category(cid_objs, device_categories):
+def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Find unique devices per category
     category_unique_devices = {}
     for category in device_categories:
@@ -65,7 +65,8 @@ def shrink_by_category(cid_objs, device_categories):
 
 def get_pool(cid_objs):
     conf_singlet = c3.config.Configuration.get_instance()
-    flag_all = conf_singlet.config['SHRINK'].getboolean('all')
+    shrink_session = conf_singlet.config['SHRINK']
+    flag_all = shrink_session.getboolean('all')
 
     # Will try to find unique device in the pool
     device_categories = cca
@@ -78,11 +79,13 @@ def get_pool(cid_objs):
         logger.info('Begin to remove filters...')
         for category in list(device_categories):
             # None or False, means we don't want to use the filter
-            filter_flag = conf_singlet.config['SHRINK'].getboolean(category)
+            filter_flag = shrink_session.getboolean(category)
             if not filter_flag:
                 device_categories.remove(category)
                 logger.warning("Forbid to use category %s" % category)
 
-    cid_objs_shrunk =  shrink_by_category(cid_objs, device_categories)
+    cid_objs_shrunk =  shrink_by_category(cid_objs,
+                                          device_categories,
+                                          shrink_session.getboolean('ifamily'))
 
     return cid_objs_shrunk
