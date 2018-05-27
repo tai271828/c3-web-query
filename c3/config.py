@@ -52,6 +52,7 @@ class Configuration(object):
         try:
             if conf_file and config['C3']['UserName']:
                 logger.info('Override C3USERNAME by the given conf file.')
+                logger.info('It is %s ' % config['C3']['UserName'])
         except KeyError:
             # fallback value
             config['C3']['UserName'] = config_default['C3']['UserName']
