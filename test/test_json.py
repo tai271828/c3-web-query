@@ -43,6 +43,7 @@ machine_metainfo = {'codename': 'Cedar 15 BDW',
                     'network': 'Realtek Semiconductor Co., Ltd. - 10ec:8136',
                     'processor': 'Intel(R) Core(TM) i7-5###U CPU @ 2.20GHz',
                     'video': 'Intel - 8086:1616',
+                    'kernel': '3.19.0-30-generic',
                     'wireless': 'Atheros Communications - 168c:0036'}
 
 
