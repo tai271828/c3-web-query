@@ -94,6 +94,18 @@ def merge_summaries(summaries_not_merge):
     return rtn_summaries
 
 
+def is_kernel_match_filter(filter_keywords, kernel_str):
+    if filter_keywords is None:
+        return False
+
+    flag_all_in = True
+    for key in filter_keywords:
+        if key not in kernel_str:
+            flag_all_in = False
+
+    return flag_all_in
+
+
 def get_cids_by_query(location, certificate, enablement, status, cids):
     try:
         print('Begin to query... ')
@@ -123,10 +135,15 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
                     cid_obj.__dict__.update(cid=cid_id)
 
                     # TODO: a workaround to filter kernel criteria
-                    filter_kernel = configuration.config['FILTER']['kernel']
+                    try:
+                        filter_kernel = \
+                            configuration.config['FILTER']['kernel']
+                    except KeyError:
+                        filter_kernel = ''
+
+                    filter_keywords = filter_kernel.split('-')
                     if filter_kernel and \
-                            '4.13' in cid_obj.kernel and \
-                            'oem' in cid_obj.kernel:
+                       is_kernel_match_filter(filter_keywords, cid_obj.kernel):
                         cids.append(cid_obj)
                     elif filter_kernel:
                         logger.warning('Skip as a workaround.')
