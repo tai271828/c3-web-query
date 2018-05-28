@@ -81,6 +81,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 def get_pool(cid_objs):
     conf_singlet = c3.config.Configuration.get_instance()
     shrink_session = conf_singlet.config['SHRINK']
+    filter_session = conf_singlet.config['FILTER']
     flag_all = shrink_session.getboolean('all')
 
     # Will try to find unique device in the pool
@@ -101,6 +102,6 @@ def get_pool(cid_objs):
 
     cid_objs_shrunk =  shrink_by_category(cid_objs,
                                           device_categories,
-                                          shrink_session.getboolean('ifamily'))
+                                          filter_session.getboolean('ifamily'))
 
     return cid_objs_shrunk

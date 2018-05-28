@@ -112,6 +112,7 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
             if is_certified(summary, certificate, enablement, status):
                 cid_id = summary['machine'].split('/')[-2]
                 print(cid_id)
+
                 if summary['report'] is None:
                     logger.warning('This certificate has no submission.')
                 else:
@@ -120,7 +121,18 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
                     # submission_report = c3q.query_submission(submission_id)
                     cid_obj = c3cid.get_cid_from_submission(submission_id)
                     cid_obj.__dict__.update(cid=cid_id)
-                    cids.append(cid_obj)
+
+                    # TODO: a workaround to filter kernel criteria
+                    filter_kernel = configuration.config['FILTER']['kernel']
+                    if filter_kernel and \
+                            '4.13' in cid_obj.kernel and \
+                            'oem' in cid_obj.kernel:
+                        cids.append(cid_obj)
+                    elif filter_kernel:
+                        logger.warning('Skip as a workaround.')
+                    else:
+                        cids.append(cid_obj)
+
     except QueryError:
         print("Problem with C3 Query")
 
