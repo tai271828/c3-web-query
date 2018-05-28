@@ -59,9 +59,10 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Begin to shrink
     cid_objs_shrunk = []
     ifamily_series = c3.maptable.ifamily_series
-    for category in device_categories:
-        logging.debug("Shrink the pool by %s" % category)
-        for cid_obj in cid_objs:
+    for cid_obj in cid_objs:
+        flag_pickup = False
+        for category in device_categories:
+            logging.debug("Shrink the pool by %s" % category)
             device = getattr(cid_obj, category)
 
             if ifamily and category == 'processor':
@@ -70,7 +71,10 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
                         device = ifamily_type
 
             if device in all_unique_devices:
-                cid_objs_shrunk.append(cid_obj)
+                flag_pickup = True
+
+        if flag_pickup:
+            cid_objs_shrunk.append(cid_obj)
 
     print('Before shrink: %i CIDs in the pool' % len(cid_objs))
     print('After shrink:  %i CIDs in the pool' % len(cid_objs_shrunk))
