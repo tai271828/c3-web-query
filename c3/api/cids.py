@@ -106,7 +106,19 @@ def is_kernel_match_filter(filter_keywords, kernel_str):
     return flag_all_in
 
 
-def get_cids_by_query(location, certificate, enablement, status, target_cids):
+def get_cids_by_query(location, certificate, enablement, status,
+                      target_cids=[], disable_flag=True):
+    """
+    Get cid objects by c3 query.
+
+    :param location: location string
+    :param certificate: certification distro
+    :param enablement: enablement status
+    :param status: certification status
+    :param target_cids: mutually exculsive option of disable_flag
+    :param disable_flag: mutually exculsive option of disable_flag
+    :return: cid objects in a list
+    """
     # return cid objects
     cids = []
     try:
@@ -129,7 +141,7 @@ def get_cids_by_query(location, certificate, enablement, status, target_cids):
                 if summary['report'] is None:
                     logger.warning('This certificate has no submission.')
                 else:
-                    if cid_id in target_cids:
+                    if cid_id in target_cids or disable_flag:
                         print("Fetching data for %s" % cid_id)
 
                         submission_id = summary['report'].split('/')[-2]
@@ -176,7 +188,8 @@ def get_cids(location, certificate, enablement, status, cache_prefix='cids'):
         print("Found cids cache. Use it.")
         cids = cids_cache
     else:
-        cids = get_cids_by_query(location, certificate, enablement, status)
+        cids = get_cids_by_query(location, certificate, enablement, status,
+                                 disable_flag=True)
         c3cache.write_cache("cids", cids)
 
     return cids
