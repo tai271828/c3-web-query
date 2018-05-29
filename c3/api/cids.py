@@ -106,7 +106,9 @@ def is_kernel_match_filter(filter_keywords, kernel_str):
     return flag_all_in
 
 
-def get_cids_by_query(location, certificate, enablement, status, cids):
+def get_cids_by_query(location, certificate, enablement, status, target_cids):
+    # return cid objects
+    cids = []
     try:
         print('Begin to query... ')
         if location == 'all':
@@ -123,32 +125,34 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
         for summary in summaries:
             if is_certified(summary, certificate, enablement, status):
                 cid_id = summary['machine'].split('/')[-2]
-                print(cid_id)
 
                 if summary['report'] is None:
                     logger.warning('This certificate has no submission.')
                 else:
-                    submission_id = summary['report'].split('/')[-2]
-                    # TODO: use query_specific_submission instead
-                    # submission_report = c3q.query_submission(submission_id)
-                    cid_obj = c3cid.get_cid_from_submission(submission_id)
-                    cid_obj.__dict__.update(cid=cid_id)
+                    if cid_id in target_cids:
+                        print("Fetching data for %s" % cid_id)
 
-                    # TODO: a workaround to filter kernel criteria
-                    try:
-                        filter_kernel = \
-                            configuration.config['FILTER']['kernel']
-                    except KeyError:
-                        filter_kernel = ''
+                        submission_id = summary['report'].split('/')[-2]
+                        # TODO: use query_specific_submission instead
+                        # submission_report = c3q.query_submission(submission_id)
+                        cid_obj = c3cid.get_cid_from_submission(submission_id)
+                        cid_obj.__dict__.update(cid=cid_id)
 
-                    filter_keywords = filter_kernel.split('-')
-                    if filter_kernel and \
-                       is_kernel_match_filter(filter_keywords, cid_obj.kernel):
-                        cids.append(cid_obj)
-                    elif filter_kernel:
-                        logger.warning('Skip as a workaround.')
-                    else:
-                        cids.append(cid_obj)
+                        # TODO: a workaround to filter kernel criteria
+                        try:
+                            filter_kernel = \
+                                configuration.config['FILTER']['kernel']
+                        except KeyError:
+                            filter_kernel = ''
+
+                        filter_keywords = filter_kernel.split('-')
+                        if filter_kernel and \
+                           is_kernel_match_filter(filter_keywords, cid_obj.kernel):
+                            cids.append(cid_obj)
+                        elif filter_kernel:
+                            logger.warning('Skip as a workaround.')
+                        else:
+                            cids.append(cid_obj)
 
     except QueryError:
         print("Problem with C3 Query")
@@ -156,7 +160,7 @@ def get_cids_by_query(location, certificate, enablement, status, cids):
     return cids
 
 
-def get_cids(location, certificate, enablement, status):
+def get_cids(location, certificate, enablement, status, cache_prefix='cids'):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
@@ -167,14 +171,12 @@ def get_cids(location, certificate, enablement, status):
     logger.debug('logger begins to debug')
 
     # Use cache is possible
-    cids_cache = c3cache.read_cache("cids")
+    cids_cache = c3cache.read_cache(cache_prefix)
     if cids_cache:
         print("Found cids cache. Use it.")
         cids = cids_cache
     else:
-        cids = []
-        cids = get_cids_by_query(location, certificate, enablement, status,
-                                 cids)
+        cids = get_cids_by_query(location, certificate, enablement, status)
         c3cache.write_cache("cids", cids)
 
     return cids
