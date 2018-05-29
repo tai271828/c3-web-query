@@ -5,7 +5,7 @@ import click
 @click.argument('basic')
 @click.argument('extra')
 @click.option('--cid', help='Target CID to query')
-def query(basic, extra, cid):
+def query_prototype(basic, extra, cid):
     """
     Query or push single CID number.
 

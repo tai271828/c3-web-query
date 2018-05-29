@@ -30,7 +30,7 @@ def create_prototype(algorithm, certificate):
               help='Show systems with the given location only')
 @click.option('--certificate',
               type=click.Choice(['14.04.5', '16.04 LTS']),
-              default='16.04',
+              default='16.04 LTS',
               help='Filters to match certify status.')
 @click.option('--enablement',
               type=click.Choice(['Enabled', 'Certified']),
