@@ -17,7 +17,6 @@ def sanity_check(base, target):
         raise Exception
 
 def get_unique_devices_in_pool(cid_objs, category, ifamily=False):
-    ifamily_series = c3.maptable.ifamily_series
     devices_in_pool = []
     device_counts_in_pool = {}
     for cid_obj in cid_objs:
@@ -48,6 +47,14 @@ def get_unique_devices_in_pool(cid_objs, category, ifamily=False):
 
 
 def get_group_cpu_name(ifamily, category, device):
+    """
+    Abstract layer to group i3, i5, i7 families.
+
+    :param ifamily: which series of cpu we want to group
+    :param category: category to make sure the input is processor
+    :param device: device to check
+    :return: grouped device name
+    """
     ifamily_series = c3.maptable.ifamily_series
     if ifamily and category == 'processor':
         for ifamily_type in ifamily_series:
@@ -55,6 +62,25 @@ def get_group_cpu_name(ifamily, category, device):
                 device = ifamily_type
 
     return device
+
+
+def get_heros(cid_objs):
+    conf_singlet = c3.config.Configuration.get_instance()
+    filter_session = conf_singlet.config['FILTER']
+
+    heros = []
+    try:
+        heros = filter_session['heros'].split('-')
+    except KeyError:
+        logger.warning("No hero platform is defined in configuration files.")
+
+    cid_obj_heros = []
+    for cid_obj in cid_objs:
+        for hero in heros:
+            if hero in cid_obj.model:
+                cid_obj_heros.append(cid_obj)
+
+    return cid_obj_heros
 
 
 def shrink_by_category(cid_objs, device_categories, ifamily=False):
@@ -78,6 +104,26 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Begin to shrink
     # phase 1: pick up those very unique
     cid_objs_shrunk = []
+    # pick up heros first
+    cid_obj_heros = get_heros(cid_objs)
+    for cid_obj in cid_obj_heros:
+        flag_pickup = False
+        for category in device_categories:
+            logger.info('Select heros first by category %s' % category)
+            device = getattr(cid_obj, category)
+
+            device = get_group_cpu_name(ifamily, category, device)
+
+            if device in list(all_unique_devices):
+                flag_pickup = True
+                # then I don't need to pick up this device anymore in the
+                # latter steps
+                all_unique_devices.remove(device)
+
+        if flag_pickup:
+            cid_objs_shrunk.append(cid_obj)
+
+    # after selecting hero platforms, now select common platforms
     for cid_obj in cid_objs:
         flag_pickup = False
         for category in device_categories:
