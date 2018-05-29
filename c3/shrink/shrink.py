@@ -64,6 +64,26 @@ def get_group_cpu_name(ifamily, category, device):
     return device
 
 
+def get_location(cid_objs):
+    conf_singlet = c3.config.Configuration.get_instance()
+    filter_session = conf_singlet.config['FILTER']
+
+    locations = []
+    try:
+        locations = filter_session['location'].split('-')
+    except KeyError:
+        logger.warning("No location filter is defined in configuration files.")
+
+    cid_obj_locations = []
+    for cid_obj in cid_objs:
+        for location in locations:
+            # TODO: implement to set location attribute of cid
+            if location in cid_obj.location:
+                cid_obj_locations.append(cid_obj)
+
+    return cid_obj_locations
+
+
 def get_heros(cid_objs):
     conf_singlet = c3.config.Configuration.get_instance()
     filter_session = conf_singlet.config['FILTER']
