@@ -129,12 +129,32 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
     for cid_obj in cid_obj_heros:
         flag_pickup = False
         for category in device_categories:
-            logger.info('Select heros first by category %s' % category)
             device = getattr(cid_obj, category)
 
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in list(all_unique_devices):
+                logger.info('Select heros first by category %s' % category)
+                flag_pickup = True
+                # then I don't need to pick up this device anymore in the
+                # latter steps
+                all_unique_devices.remove(device)
+
+        if flag_pickup:
+            cid_objs_shrunk.append(cid_obj)
+
+    # pick up systems by location priority
+    cid_obj_locations = get_location(cid_objs)
+    for cid_obj in cid_obj_locations:
+        flag_pickup = False
+        for category in device_categories:
+            device = getattr(cid_obj, category)
+
+            device = get_group_cpu_name(ifamily, category, device)
+
+            if device in list(all_unique_devices):
+                logger.info('Select specific location first by category %s' %
+                            category)
                 flag_pickup = True
                 # then I don't need to pick up this device anymore in the
                 # latter steps

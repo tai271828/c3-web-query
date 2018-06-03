@@ -12,7 +12,8 @@ loglevel = {'debug': logging.DEBUG, 'info': logging.INFO,
 
 machine_metainfo_attr = ['make', 'model', 'codename', 'form_factor',
                          'processor', 'video', 'wireless', 'network',
-                         'kernel']
+                         'kernel',
+                         'location']
 
 device_audio_attr = ['audio_pciid', 'audio_name']
 

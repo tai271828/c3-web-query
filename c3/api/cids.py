@@ -106,6 +106,13 @@ def is_kernel_match_filter(filter_keywords, kernel_str):
     return flag_all_in
 
 
+def has_same_len(base, target):
+    if len(base) == len(target):
+        return True
+    else:
+        return False
+
+
 def get_cids_by_query(location, certificate, enablement, status,
                       target_cids=[], disable_flag=True):
     """
@@ -123,17 +130,31 @@ def get_cids_by_query(location, certificate, enablement, status,
     cids = []
     try:
         print('Begin to query... ')
+        summaries_location = []
         if location == 'all':
             summaries_not_merge = []
+            # lcts: locations
+            summaries_not_merge_lcts = []
             for location_entry in c3.maptable.location:
                 summaries_entry = get_certificates_by_location(location_entry)
                 summaries_not_merge.append(summaries_entry)
+
+                entry_locations = [location_entry] * len(summaries_entry)
+                summaries_not_merge_lcts.append(entry_locations)
+
             summaries = merge_summaries(summaries_not_merge)
+            summaries_location = merge_summaries(summaries_not_merge_lcts)
+
+            if not has_same_len(summaries, summaries_location):
+                logger.critical("Location flag list length is incorrect.")
+                raise Exception
 
         else:
             summaries = get_certificates_by_location(location)
+            summaries_location = ['location']*len(summaries)
 
         print('Get certificate-location result per CIDs')
+        counter_location = 0
         for summary in summaries:
             if is_certified(summary, certificate, enablement, status):
                 cid_id = summary['machine'].split('/')[-2]
@@ -149,6 +170,9 @@ def get_cids_by_query(location, certificate, enablement, status,
                         # submission_report = c3q.query_submission(submission_id)
                         cid_obj = c3cid.get_cid_from_submission(submission_id)
                         cid_obj.__dict__.update(cid=cid_id)
+                        location_index = summaries.index(summary)
+                        cid_location = summaries_location[location_index]
+                        cid_obj.__dict__.update(location=cid_location)
 
                         # TODO: a workaround to filter kernel criteria
                         try:
@@ -165,6 +189,8 @@ def get_cids_by_query(location, certificate, enablement, status,
                             logger.warning('Skip as a workaround.')
                         else:
                             cids.append(cid_obj)
+
+            counter_location += 1
 
     except QueryError:
         print("Problem with C3 Query")
