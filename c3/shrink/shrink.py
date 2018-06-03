@@ -174,6 +174,9 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 
             if device in all_unique_devices:
                 flag_pickup = True
+                # then I don't need to pick up this device anymore in the
+                # latter steps
+                all_unique_devices.remove(device)
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
