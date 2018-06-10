@@ -119,6 +119,23 @@ def if_blacklist(cid_id):
         return False
 
 
+def if_replacement(cid_obj, device):
+    conf_singlet = c3.config.Configuration.get_instance()
+    filter_session = conf_singlet.config['FILTER']
+
+    cid_device = []
+    try:
+        cid_device = filter_session['replacement'].split('_')
+    except KeyError:
+        logger.warning('No replacement is defined in configuration files.')
+
+    replace_device = getattr(cid_obj, cid_device[1])
+    if cid_obj.cid == cid_device[0] and device == replace_device:
+        return True
+    else:
+        return False
+
+
 def label_selection_category(cid_objs, c_unique_devices, c_duplicate_devices):
     # merge
     category_devices = {}
@@ -175,7 +192,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 
             if device in list(all_unique_devices):
                 logger.info('Select heros first by category %s' % category)
-                if if_blacklist(cid_obj.cid):
+                if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
                     flag_pickup = True
@@ -196,7 +213,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in list(all_unique_devices):
-                if if_blacklist(cid_obj.cid):
+                if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
                     logger.info('Select specific location first'
@@ -219,7 +236,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in all_unique_devices:
-                if if_blacklist(cid_obj.cid):
+                if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
                     flag_pickup = True
@@ -253,11 +270,11 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
                 device_cid = getattr(cid_obj, category)
                 device_cid = get_group_cpu_name(ifamily, category, device_cid)
                 if device == device_cid:
-                    if if_blacklist(cid_obj.cid):
+                    if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                         pass
                     else:
-                        all_duplicate_devices.remove(device)
                         flag_pickup = True
+                        all_duplicate_devices.remove(device)
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
