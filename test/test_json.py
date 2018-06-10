@@ -44,6 +44,7 @@ machine_metainfo = {'codename': 'Cedar 15 BDW',
                     'processor': 'Intel(R) Core(TM) i7-5###U CPU @ 2.20GHz',
                     'video': 'Intel - 8086:1616',
                     'kernel': '3.19.0-30-generic',
+                    'location': 'NA',
                     'wireless': 'Atheros Communications - 168c:0036'}
 
 
