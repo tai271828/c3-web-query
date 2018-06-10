@@ -103,6 +103,22 @@ def get_heros(cid_objs):
     return cid_obj_heros
 
 
+def if_blacklist(cid_id):
+    conf_singlet = c3.config.Configuration.get_instance()
+    filter_session = conf_singlet.config['FILTER']
+
+    black_cids = []
+    try:
+        black_cids = filter_session['blacklist'].split('_')
+    except KeyError:
+        logger.warning('No blacklist is defined in configuration files.')
+
+    if cid_id in black_cids:
+        return True
+    else:
+        return False
+
+
 def label_selection_category(cid_objs, c_unique_devices, c_duplicate_devices):
     # merge
     category_devices = {}
@@ -125,6 +141,7 @@ def label_selection_category(cid_objs, c_unique_devices, c_duplicate_devices):
             return False
 
     return True
+
 
 def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Find unique devices per category
@@ -158,10 +175,13 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 
             if device in list(all_unique_devices):
                 logger.info('Select heros first by category %s' % category)
-                flag_pickup = True
-                # then I don't need to pick up this device anymore in the
-                # latter steps
-                all_unique_devices.remove(device)
+                if if_blacklist(cid_obj.cid):
+                    pass
+                else:
+                    flag_pickup = True
+                    # then I don't need to pick up this device anymore in the
+                    # latter steps
+                    all_unique_devices.remove(device)
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
@@ -176,12 +196,15 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in list(all_unique_devices):
-                logger.info('Select specific location first by category %s' %
-                            category)
-                flag_pickup = True
-                # then I don't need to pick up this device anymore in the
-                # latter steps
-                all_unique_devices.remove(device)
+                if if_blacklist(cid_obj.cid):
+                    pass
+                else:
+                    logger.info('Select specific location first'
+                                ' by category %s' % category)
+                    flag_pickup = True
+                    # then I don't need to pick up this device anymore in the
+                    # latter steps
+                    all_unique_devices.remove(device)
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
@@ -196,10 +219,13 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in all_unique_devices:
-                flag_pickup = True
-                # then I don't need to pick up this device anymore in the
-                # latter steps
-                all_unique_devices.remove(device)
+                if if_blacklist(cid_obj.cid):
+                    pass
+                else:
+                    flag_pickup = True
+                    # then I don't need to pick up this device anymore in the
+                    # latter steps
+                    all_unique_devices.remove(device)
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
@@ -227,8 +253,11 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
                 device_cid = getattr(cid_obj, category)
                 device_cid = get_group_cpu_name(ifamily, category, device_cid)
                 if device == device_cid:
-                    all_duplicate_devices.remove(device)
-                    flag_pickup = True
+                    if if_blacklist(cid_obj.cid):
+                        pass
+                    else:
+                        all_duplicate_devices.remove(device)
+                        flag_pickup = True
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
