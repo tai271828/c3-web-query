@@ -103,6 +103,29 @@ def get_heros(cid_objs):
     return cid_obj_heros
 
 
+def label_selection_category(cid_objs, c_unique_devices, c_duplicate_devices):
+    # merge
+    category_devices = {}
+    for key_ud in c_unique_devices:
+        ud = c_unique_devices[key_ud]
+        dd = c_duplicate_devices[key_ud]
+        category_devices[key_ud] = ud + dd
+
+    for cid in cid_objs:
+        unique_label = []
+        for category in category_devices.keys():
+            device = getattr(cid, category)
+            if device in category_devices[category]:
+                unique_label.append(category)
+                cid.__dict__.update(unique_label=unique_label)
+                category_devices[category].remove(device)
+
+        if len(unique_label) == 0:
+            logger.critical("Not found any unique device for cid %s" % cid.cid)
+            return False
+
+    return True
+
 def shrink_by_category(cid_objs, device_categories, ifamily=False):
     # Find unique devices per category
     category_unique_devices = {}
@@ -209,6 +232,13 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
 
         if flag_pickup:
             cid_objs_shrunk.append(cid_obj)
+
+    # we have shrank the pool already. let's append the meta data to elaborate
+    # the unique device category so users could know what is the reason to
+    # select or not select this system.
+    label_selection_category(cid_objs_shrunk,
+                             category_unique_devices,
+                             category_duplicate_devices)
 
     print('After shrink:  %i CIDs in the pool' % len(cid_objs_shrunk))
 

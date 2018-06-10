@@ -12,26 +12,45 @@ FIELDNAMES = ['CID',
               'Vendor', 'Model', 'Code Name', 'Form',
               'CPU', 'GPU',
               'Wireless', 'Ethernet',
-              'Audio ID', 'Audio Name']
+              'Audio ID', 'Audio Name',
+              'Unique Label']
 
 
 def generate_csv_row(cid, writer):
     if cid:
-        writer.writerow({'CID': cid.cid,
-                         # 'Release': cid.info_release,
-                         # 'Level': info_level,
-                         # 'Location': location,
-                         'Vendor': cid.make,
-                         'Model': cid.model,
-                         'Code Name': cid.codename,
-                         'Form': cid.form_factor,
-                         'CPU': cid.processor,
-                         'GPU': cid.video,
-                         'Wireless': cid.wireless,
-                         'Ethernet': cid.network,
-                         'Audio ID': cid.audio_pciid,
-                         'Audio Name': cid.audio_name
-                         })
+        try:
+            writer.writerow({'CID': cid.cid,
+                             # 'Release': cid.info_release,
+                             # 'Level': info_level,
+                             # 'Location': location,
+                             'Vendor': cid.make,
+                             'Model': cid.model,
+                             'Code Name': cid.codename,
+                             'Form': cid.form_factor,
+                             'CPU': cid.processor,
+                             'GPU': cid.video,
+                             'Wireless': cid.wireless,
+                             'Ethernet': cid.network,
+                             'Audio ID': cid.audio_pciid,
+                             'Audio Name': cid.audio_name,
+                             'Unique Label': cid.unique_label
+                             })
+        except AttributeError:
+            writer.writerow({'CID': cid.cid,
+                             # 'Release': cid.info_release,
+                             # 'Level': info_level,
+                             # 'Location': location,
+                             'Vendor': cid.make,
+                             'Model': cid.model,
+                             'Code Name': cid.codename,
+                             'Form': cid.form_factor,
+                             'CPU': cid.processor,
+                             'GPU': cid.video,
+                             'Wireless': cid.wireless,
+                             'Ethernet': cid.network,
+                             'Audio ID': cid.audio_pciid,
+                             'Audio Name': cid.audio_name
+                             })
     else:
         logger.warning("No data for {}".format(cid))
         writer.writerow({'CID': cid,
