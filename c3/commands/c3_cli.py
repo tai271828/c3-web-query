@@ -39,7 +39,7 @@ def main(c3username, c3apikey, verbose, conf):
     # ready default.ini to get every basic attribute ready
     configuration.read_configuration(template.name)
     if conf:
-        logger.info('User customized conf is specified.')
+        logger.debug('User customized conf is specified.')
         configuration.read_configuration(conf)
     # default value from the configuration file
     # fallback order: env var > customized conf > default.ini
@@ -67,11 +67,11 @@ def main(c3username, c3apikey, verbose, conf):
     except KeyError:
         logger.warning('Fallback to default verbose value.')
 
-    logging.info('Configuration:')
+    logging.debug('Configuration:')
     logging.info('User specified conf file: %s' % conf)
-    logging.info('C3 username: %s' % c3username)
-    logging.info('C3 API KEY: %s' % c3apikey)
-    logging.info('Output verbose level: %s' % verbose)
+    logging.debug('C3 username: %s' % c3username)
+    logging.debug('C3 API KEY: %s' % c3apikey)
+    logging.debug('Output verbose level: %s' % verbose)
 
 
 main.add_command(group_batch.create)

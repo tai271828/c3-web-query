@@ -33,7 +33,7 @@ def get_unique_devices_in_pool(cid_objs, category, ifamily=False):
             device_counts_in_pool[device] = 1
 
     sanity_check(devices_in_pool, device_counts_in_pool.keys())
-    logger.info('Sanity check completed. %s looks good.' % category)
+    logger.debug('Sanity check completed. %s looks good.' % category)
 
     unique_devices_in_pool = []
     duplicate_devices_in_pool = []
@@ -111,7 +111,7 @@ def if_blacklist(cid_id):
     try:
         black_cids = filter_session['blacklist'].split('_')
     except KeyError:
-        logger.warning('No blacklist is defined in configuration files.')
+        logger.debug('No blacklist is defined in configuration files.')
 
     if cid_id in black_cids:
         return True
@@ -193,7 +193,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
     for category in category_unique_devices.keys():
         all_unique_devices.extend(category_unique_devices[category])
         all_duplicate_devices.extend(category_duplicate_devices[category])
-    logger.info("All unique devices: %s" % all_unique_devices)
+    logger.debug("All unique devices: %s" % all_unique_devices)
 
     print('Before shrink: %i CIDs in the pool' % len(cid_objs))
     # Begin to shrink
@@ -209,7 +209,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             device = get_group_cpu_name(ifamily, category, device)
 
             if device in list(all_unique_devices):
-                logger.info('Select heros first by category %s' % category)
+                logger.debug('Select heros first by category %s' % category)
                 if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
@@ -234,7 +234,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
                 if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
-                    logger.info('Select specific location first'
+                    logger.debug('Select specific location first'
                                 ' by category %s' % category)
                     flag_pickup = True
                     # then I don't need to pick up this device anymore in the
@@ -321,15 +321,15 @@ def get_pool(cid_objs):
     # Check the configuration to see what shrink filter we are going to use.
     # Remove the filter not found in the configuration.
     if flag_all:
-        logger.info('All filter are going to use.')
+        logger.debug('All filter are going to use.')
     else:
-        logger.info('Begin to remove filters...')
+        logger.debug('Begin to remove filters...')
         for category in list(device_categories):
             # None or False, means we don't want to use the filter
             filter_flag = shrink_session.getboolean(category)
             if not filter_flag:
                 device_categories.remove(category)
-                logger.warning("Forbid to use category %s" % category)
+                logger.debug("Forbid to use category %s" % category)
 
     cid_objs_shrunk =  shrink_by_category(cid_objs,
                                           device_categories,

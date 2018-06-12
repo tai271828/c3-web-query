@@ -45,42 +45,42 @@ class Configuration(object):
         config_default.read(template.name)
 
         if conf_file:
-            logger.info('Reading conf...')
-            logger.info('Found %s' % conf_file)
+            logger.debug('Reading conf...')
+            logger.debug('Found %s' % conf_file)
             config.read(conf_file)
 
         try:
             if conf_file and config['C3']['UserName']:
-                logger.info('Override C3USERNAME by the given conf file.')
-                logger.info('It is %s ' % config['C3']['UserName'])
+                logger.debug('Override C3USERNAME by the given conf file.')
+                logger.debug('It is %s ' % config['C3']['UserName'])
         except KeyError:
             # fallback value
             config['C3']['UserName'] = config_default['C3']['UserName']
-            logger.info('No given C3 Username. Use default.ini ')
+            logger.debug('No given C3 Username. Use default.ini ')
 
         try:
             if conf_file and config['C3']['APIKey']:
-                logger.info('Override C3APIKEY by the given conf file.')
+                logger.debug('Override C3APIKEY by the given conf file.')
         except KeyError:
             # fallback value
             config['C3']['APIKey'] = config_default['C3']['APIKey']
-            logger.info('No given C3 API key. Use default.ini')
+            logger.debug('No given C3 API key. Use default.ini')
 
         try:
             if conf_file and config['GENERAL']['verbose']:
-                logger.info('Override verbose by the given conf file.')
+                logger.debug('Override verbose by the given conf file.')
         except KeyError:
             # fallback value
             config['GENERAL']['verbose'] = config_default['GENERAL']['verbose']
-            logger.info('No given verbose. Use default.ini')
+            logger.debug('No given verbose. Use default.ini')
 
         try:
             if conf_file and config['SHRINK']['all']:
-                logger.info('Override shrink flag by the given conf file')
+                logger.debug('Override shrink flag by the given conf file')
         except KeyError:
             # fallback value
             config['SHRINK']['all'] = config_default['SHRINK']['all']
-            logger.info('No given shrink flag. Use default.ini')
+            logger.debug('No given shrink flag. Use default.ini')
 
         self.config = config
 
