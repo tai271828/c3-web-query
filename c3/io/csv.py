@@ -13,7 +13,7 @@ FIELDNAMES = ['CID',
               'CPU', 'GPU',
               'Wireless', 'Ethernet',
               'Audio ID', 'Audio Name',
-              'Unique Label']
+              'Selection For']
 
 
 def generate_csv_row(cid, writer):
@@ -33,7 +33,7 @@ def generate_csv_row(cid, writer):
                              'Ethernet': cid.network,
                              'Audio ID': cid.audio_pciid,
                              'Audio Name': cid.audio_name,
-                             'Unique Label': cid.unique_label
+                             'Selection For': cid.unique_label
                              })
         except AttributeError:
             writer.writerow({'CID': cid.cid,
