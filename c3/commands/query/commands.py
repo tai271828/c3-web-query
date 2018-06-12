@@ -46,6 +46,35 @@ def query(cid, cid_list, csv, certificate, enablement, status):
         c3csv.generate_csv(cid_objs, csv)
 
 
+@click.command()
+@click.option('--location',
+              type=click.Choice(['taipei', 'beijing', 'lexington']),
+              default='taipei',
+              help='Change to location')
+@click.option('--cid',
+              help='single CID to query.')
+@click.option('--cid-list',
+              help='CID list to query. One CID one row.')
+def location(location, cid, cid_list):
+    logger.info("Begin to execute.")
+
+    cids = []
+
+    if cid:
+        cids.append(cid)
+
+    if cid_list:
+        cids_from_list = read_cids(cid_list)
+        cids.extend(cids_from_list)
+
+    # TODO: push the location status to C3
+    print('CID')
+    print('Original location:')
+    print('Original holder:')
+    print('To Be location:')
+    print('To BE holder')
+
+
 def read_cids(cid_list_file):
     rtn = []
     fhandler = open(cid_list_file, 'r')
