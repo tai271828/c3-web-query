@@ -25,13 +25,3 @@ def test_get_machine_info():
     mm = c3component.get_machine_info(machine_report)
 
     assert compare_shallow_dict(machine_metainfo, mm)
-
-def test_shrink():
-
-    configuration.read_configuration(ini_test.name)
-
-    cid_objs = convert.dict_to_cid_obj_cids(cids_before_shrink)
-    cid_objs_shrank = shrink.get_pool(cid_objs)
-    target = convert.cid_obj_to_dict_cids(cid_objs_shrank)
-
-    assert compare.cid_objs(cids_after_shrink, target)
