@@ -160,7 +160,25 @@ def label_selection_category(cid_objs, c_unique_devices, c_duplicate_devices):
     return True
 
 
+def sort_cid_objs(cid_objs):
+    cid_ids = []
+    cid_objs_sorted = []
+    for cid_obj in cid_objs:
+        cid_ids.append(cid_obj.cid)
+
+    cid_ids.sort(reverse=True)
+
+    for cid_id in cid_ids:
+        for cid_obj in cid_objs:
+            if cid_obj.cid == cid_id:
+                cid_objs_sorted.append(cid_obj)
+
+    return cid_objs_sorted
+
+
 def shrink_by_category(cid_objs, device_categories, ifamily=False):
+    # sorting first to make sure each shrink result consistent
+    cid_objs = sort_cid_objs(cid_objs)
     # Find unique devices per category
     category_unique_devices = {}
     category_duplicate_devices = {}
