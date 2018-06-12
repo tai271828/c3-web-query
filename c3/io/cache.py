@@ -9,7 +9,7 @@ import pickle
 def read_cache(prefix):
     pickle_fn = prefix + '.pickle'
 
-    logging.info("Trying to find cache: %s" % pickle_fn)
+    logging.debug("Trying to find cache: %s" % pickle_fn)
 
     try:
         with open(pickle_fn, 'rb') as handle:

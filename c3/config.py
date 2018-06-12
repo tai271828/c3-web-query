@@ -41,6 +41,7 @@ class Configuration(object):
         :return: configuration object
         """
         config = ConfigParser()
+        # always provides default value
         config_default = ConfigParser()
         config_default.read(template.name)
 

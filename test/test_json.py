@@ -1,5 +1,6 @@
 import c3.json.component as c3component
 import c3.config as c3config
+import pkg_resources
 from c3.helper import compare, convert
 from data.machine import machine_report, machine_metainfo
 from data.cids import cids_before_shrink, cids_after_shrink
@@ -7,6 +8,10 @@ from c3.shrink import shrink
 
 
 configuration = c3config.Configuration.get_instance()
+
+resource_package = __name__
+path_test = '/'.join(('./data', 'test_conf.ini'))
+ini_test = pkg_resources.resource_stream(resource_package, path_test)
 
 
 def compare_shallow_dict(base, target):
@@ -23,7 +28,7 @@ def test_get_machine_info():
 
 def test_shrink():
 
-    configuration.read_configuration('/home/tai271828/work/c3-web-query-working/my_conf.ini')
+    configuration.read_configuration(ini_test.name)
 
     cid_objs = convert.dict_to_cid_obj_cids(cids_before_shrink)
     cid_objs_shrank = shrink.get_pool(cid_objs)
