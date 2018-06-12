@@ -195,3 +195,19 @@ def get_location_api_by_location(location='Taipei'):
     api_location = api_location + lookup_table[location]
 
     return api_location
+
+
+def query_holder(cid):
+    pass
+
+
+def query_location(cid):
+    pass
+
+
+def push_holder(cid, holder):
+    pass
+
+
+def push_location(cid, location):
+    pass

@@ -1,6 +1,7 @@
 import click
 import logging
 import c3.api.cids as c3cids
+import c3.api.query as c3query
 import c3.io.csv as c3csv
 
 
@@ -47,6 +48,8 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 
 
 @click.command()
+@click.option('--holder',
+              help='to be holder.')
 @click.option('--location',
               type=click.Choice(['taipei', 'beijing', 'lexington']),
               default='taipei',
@@ -55,7 +58,7 @@ def query(cid, cid_list, csv, certificate, enablement, status):
               help='single CID to query.')
 @click.option('--cid-list',
               help='CID list to query. One CID one row.')
-def location(location, cid, cid_list):
+def location(holder, location, cid, cid_list):
     logger.info("Begin to execute.")
 
     cids = []
@@ -68,11 +71,15 @@ def location(location, cid, cid_list):
         cids.extend(cids_from_list)
 
     # TODO: push the location status to C3
-    print('CID')
-    print('Original location:')
-    print('Original holder:')
-    print('To Be location:')
-    print('To BE holder')
+    holder_asis = c3query.query_holder(cid)
+    location_asis = c3query.query_location(cid)
+    c3query.push_holder(cid, holder)
+    c3query.push_location(cid, location)
+    print('CID %s:' % cid)
+    print('Current location: %s' % location_asis)
+    print('Current holder: %s' % holder_asis)
+    print('To Be location: %s' % holder)
+    print('To BE holder: %s' % location)
 
 
 def read_cids(cid_list_file):
