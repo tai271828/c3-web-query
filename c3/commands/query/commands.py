@@ -49,7 +49,7 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 
 @click.command()
 @click.option('--holder',
-              help='to be holder.')
+              help='To be holder. Use Launchpad ID.')
 @click.option('--location',
               type=click.Choice(['taipei', 'beijing', 'lexington']),
               default='taipei',
@@ -72,13 +72,16 @@ def location(holder, location, cid, cid_list):
 
     # TODO: push the location status to C3
     holder_asis, location_asis = c3query.query_holder_location(cid)
-    c3query.push_holder(cid, holder)
-    c3query.push_location(cid, location)
     print('====== CID %s ======' % cid)
     print('Current location: %s' % location_asis)
     print('Current holder: %s' % holder_asis)
-    print('To Be location: %s' % holder)
-    print('To BE holder: %s' % location)
+    print('Changing holder and location...')
+    c3query.push_holder(cid, holder)
+    c3query.push_location(cid, location)
+    print('Changed.\n')
+    holder_asis, location_asis = c3query.query_holder_location(cid)
+    print('Current location: %s' % location_asis)
+    print('Current holder: %s' % holder_asis)
 
 
 def read_cids(cid_list_file):
