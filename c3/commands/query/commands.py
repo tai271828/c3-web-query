@@ -70,6 +70,22 @@ def location(holder, location, cid, cid_list):
         cids_from_list = read_cids(cid_list)
         cids.extend(cids_from_list)
 
+    if holder and location:
+        change_location_holder(cids, location, holder)
+    else:
+        query_location_holder(cids)
+
+
+def query_location_holder(cids):
+    for cid_to_change in cids:
+        ctc = cid_to_change
+        holder_asis, location_asis = c3query.query_holder_location(ctc)
+        print('====== CID %s ======' % ctc)
+        print('Current location: %s' % location_asis)
+        print('Current holder: %s' % holder_asis)
+
+
+def change_location_holder(cids, location, holder):
     for cid_to_change in cids:
         ctc = cid_to_change
         holder_asis, location_asis = c3query.query_holder_location(ctc)
