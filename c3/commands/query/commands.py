@@ -71,11 +71,10 @@ def location(holder, location, cid, cid_list):
         cids.extend(cids_from_list)
 
     # TODO: push the location status to C3
-    holder_asis = c3query.query_holder(cid)
-    location_asis = c3query.query_location(cid)
+    holder_asis, location_asis = c3query.query_holder_location(cid)
     c3query.push_holder(cid, holder)
     c3query.push_location(cid, location)
-    print('CID %s:' % cid)
+    print('====== CID %s ======' % cid)
     print('Current location: %s' % location_asis)
     print('Current holder: %s' % holder_asis)
     print('To Be location: %s' % holder)

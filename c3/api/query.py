@@ -15,6 +15,16 @@ configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
 
 
+def query_over_api_hardware(cid):
+    conf_instance = c3.config.Configuration.get_instance()
+    c3url = conf_instance.config['C3']['URI']
+    hardware_api = conf_instance.config['API']['hardware']
+    result = api_instance.api.single_query(c3url + hardware_api + cid,
+                                           params=api_instance.request_params)
+
+    return result
+
+
 def query_location_vendor(cid):
     """
     Get hardware location and vendor's name by CID
@@ -22,11 +32,7 @@ def query_location_vendor(cid):
     :param cid: string
     :return: string, string.
     """
-    conf_instance = c3.config.Configuration.get_instance()
-    c3url = conf_instance.config['C3']['URI']
-    hardware_api = conf_instance.config['API']['hardware']
-    result = api_instance.api.single_query(c3url + hardware_api + cid,
-                                           params=api_instance.request_params)
+    result = query_over_api_hardware(cid)
 
     if result['location']:
         info_location = result['location'].get('name', 'NA')
@@ -197,12 +203,31 @@ def get_location_api_by_location(location='Taipei'):
     return api_location
 
 
-def query_holder(cid):
-    pass
+def parse_holder(result):
+    if result['holder']:
+        info = result['holder'].get('display_name', 'NA')
+    else:
+        info = 'NA'
+
+    return info
 
 
-def query_location(cid):
-    pass
+def parse_location(result):
+    if result['location']:
+        info_location = result['location'].get('name', 'NA')
+    else:
+        info_location = 'NA'
+
+    return info_location
+
+
+def query_holder_location(cid):
+    result = query_over_api_hardware(cid)
+
+    holder = parse_holder(result)
+    location = parse_location(result)
+
+    return holder, location
 
 
 def push_holder(cid, holder):
