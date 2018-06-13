@@ -6,6 +6,7 @@ import c3.maptable
 import c3.api.api as c3api
 import requests
 import logging
+import json
 
 logger = logging.getLogger('c3_web_query')
 format_str = "[ %(funcName)s() ] %(message)s"
@@ -15,6 +16,34 @@ configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
 
 
+def query_over_api_hardware(cid):
+    conf_instance = c3.config.Configuration.get_instance()
+    c3url = conf_instance.config['C3']['URI']
+    hardware_api = conf_instance.config['API']['hardware']
+    result = api_instance.api.single_query(c3url + hardware_api + cid,
+                                           params=api_instance.request_params)
+
+    return result
+
+
+def push_over_api_hardware(cid, data, header=None):
+    if not header:
+        header = {"Content-Type": "application/json"}
+
+    conf_instance = c3.config.Configuration.get_instance()
+
+    c3url = conf_instance.config['C3']['URI']
+    hardware_api = conf_instance.config['API']['hardware']
+    api_url = c3url + hardware_api + cid + "/"
+
+    response = requests.patch(api_url,
+                              params=api_instance.request_params,
+                              data=data,
+                              headers=header)
+
+    return response
+
+
 def query_location_vendor(cid):
     """
     Get hardware location and vendor's name by CID
@@ -22,11 +51,7 @@ def query_location_vendor(cid):
     :param cid: string
     :return: string, string.
     """
-    conf_instance = c3.config.Configuration.get_instance()
-    c3url = conf_instance.config['C3']['URI']
-    hardware_api = conf_instance.config['API']['hardware']
-    result = api_instance.api.single_query(c3url + hardware_api + cid,
-                                           params=api_instance.request_params)
+    result = query_over_api_hardware(cid)
 
     if result['location']:
         info_location = result['location'].get('name', 'NA')
@@ -195,3 +220,52 @@ def get_location_api_by_location(location='Taipei'):
     api_location = api_location + lookup_table[location]
 
     return api_location
+
+
+def parse_holder(result):
+    if result['holder']:
+        info = result['holder'].get('display_name', 'NA')
+    else:
+        info = 'NA'
+
+    return info
+
+
+def parse_location(result):
+    if result['location']:
+        info_location = result['location'].get('name', 'NA')
+    else:
+        info_location = 'NA'
+
+    return info_location
+
+
+def query_holder_location(cid):
+    result = query_over_api_hardware(cid)
+
+    holder = parse_holder(result)
+    location = parse_location(result)
+
+    return holder, location
+
+
+def push_holder(cid, holder):
+    uri_holder = '/api/v1/launchpadpeople/' + holder + '/'
+    data_holder = json.dumps({'holder': uri_holder})
+
+    response = push_over_api_hardware(cid, data_holder)
+
+    return response
+
+def push_location(cid, location):
+    # the endpoint slash is necessary
+    lookup_table = c3.maptable.location
+    location_name = location.lower()
+    api_locations = configuration.config['API']['locations']
+    location_uri = api_locations + lookup_table[location_name] + '/'
+
+    data_location = json.dumps({"location": location_uri})
+
+    response = push_over_api_hardware(cid, data_location)
+
+    return response

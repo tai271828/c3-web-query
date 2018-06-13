@@ -1,6 +1,7 @@
 import click
 import logging
 import c3.api.cids as c3cids
+import c3.api.query as c3query
 import c3.io.csv as c3csv
 
 
@@ -44,6 +45,43 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 
     if csv:
         c3csv.generate_csv(cid_objs, csv)
+
+
+@click.command()
+@click.option('--holder',
+              help='To be holder. Use Launchpad ID.')
+@click.option('--location',
+              type=click.Choice(['taipei', 'beijing', 'lexington']),
+              default='taipei',
+              help='Change to location')
+@click.option('--cid',
+              help='single CID to query.')
+@click.option('--cid-list',
+              help='CID list to query. One CID one row.')
+def location(holder, location, cid, cid_list):
+    logger.info("Begin to execute.")
+
+    cids = []
+
+    if cid:
+        cids.append(cid)
+
+    if cid_list:
+        cids_from_list = read_cids(cid_list)
+        cids.extend(cids_from_list)
+
+    # TODO: push the location status to C3
+    holder_asis, location_asis = c3query.query_holder_location(cid)
+    print('====== CID %s ======' % cid)
+    print('Current location: %s' % location_asis)
+    print('Current holder: %s' % holder_asis)
+    print('Changing holder and location...')
+    c3query.push_holder(cid, holder)
+    c3query.push_location(cid, location)
+    print('Changed.\n')
+    holder_asis, location_asis = c3query.query_holder_location(cid)
+    print('Current location: %s' % location_asis)
+    print('Current holder: %s' % holder_asis)
 
 
 def read_cids(cid_list_file):

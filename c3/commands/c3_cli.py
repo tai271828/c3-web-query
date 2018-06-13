@@ -78,3 +78,5 @@ main.add_command(group_batch.create)
 main.add_command(group_batch.create_prototype)
 main.add_command(group_single.query_prototype)
 main.add_command(group_query.query)
+main.add_command(group_query.location)
+
