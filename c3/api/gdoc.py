@@ -58,7 +58,9 @@ def get_target_data(sheet, target_column):
             string_template = '{} ' * len(tc)
             for col in tc:
                 col = int(col)
-                row_target.append(row[col])
+                # strip the string, e.g. cid
+                # to make the process more robust
+                row_target.append(row[col].strip())
             print(string_template.format(*row_target))
             rows.append(row_target)
 

@@ -1,6 +1,8 @@
 import click
+import csv
+import time
 import c3.api.gdoc as c3gdoc
-import c3.io.csv as c3csv
+import c3.api.query as c3query
 
 
 @click.command()
@@ -33,4 +35,33 @@ def google_doc(doc_type, doc_id,
     target_data_sheet = c3gdoc.get_target_data(sheet, target_column)
     print(target_data_sheet)
 
+    cids = []
+    for row in target_data_sheet:
+        cid = row[0]
+        cids.append(cid)
 
+    target_data_c3 = []
+    sleep_counter = 0
+    for cid in cids:
+        print('Fetching {} from c3'.format(cid))
+        holder, location = c3query.query_holder_location(cid)
+        target_data_c3.append([cid, location, holder])
+        # in case the server rejects the high frequent query
+        if sleep_counter % 100 == 0:
+            time.sleep(1)
+
+    with open(output, 'w') as csv_file:
+        fn = ['CID',
+              'HOLDER - GDoc', 'HOLDER - C3',
+              'Location - GDoc', 'Location - C3']
+        writer = csv.DictWriter(csv_file, fieldnames=fn)
+        writer.writeheader()
+        for rn in range(len(target_data_sheet)):
+            sheet_row = target_data_sheet[rn]
+            c3_row = target_data_c3[rn]
+            print('Dumping {}'.format(sheet_row[0]))
+            writer.writerow({'CID': sheet_row[0],
+                             'HOLDER - GDoc': sheet_row[1],
+                             'HOLDER - C3': c3_row[1],
+                             'Location - GDoc': sheet_row[2],
+                             'Location - C3': c3_row[2]})

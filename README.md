@@ -17,12 +17,17 @@ ci.read_configuration('my_conf.ini')
 from c3.api.api_utils import APIQuery
 
 api = APIQuery(ci.config['C3']['URI'])
-rparam = {"username": ci.config['C3']['URI'],"api_key": ci.config['C3']['APIKey']}
+rparam = {"username": ci.config['C3']['UserName'], "api_key": ci.config['C3']['APIKey']}
 
 c3query.api_instance.set_api_params(api, rparam)
+```
 
-
+```python
 machine_report = c3query.query_specific_machine_report(106445)
+```
+
+```python
+c3query.query_holder_location('201605-22027')
 ```
 
 ## Change the Inventory Data on C3
