@@ -29,8 +29,8 @@ def google_doc(doc_type, doc_id,
     """
     CRUD of the google doc.
     """
-    sheet = c3gdoc.get_sheet_data(doc_type, doc_id, tab, cell, column,
-                                  target_column)
-    print(sheet)
+    sheet = c3gdoc.get_sheet_data(doc_type, doc_id, tab, cell, column)
+    target_data_sheet = c3gdoc.get_target_data(sheet, target_column)
+    print(target_data_sheet)
 
 
