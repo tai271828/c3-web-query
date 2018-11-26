@@ -8,6 +8,7 @@ from c3.api.api_utils import APIQuery
 from c3.commands.pool import commands as group_batch
 from c3.commands.single import commands as group_single
 from c3.commands.query import commands as group_query
+from c3.commands.gdoc import commands as group_gdoc
 
 
 logger = logging.getLogger('c3_web_query')
@@ -79,4 +80,5 @@ main.add_command(group_batch.create_prototype)
 main.add_command(group_single.query_prototype)
 main.add_command(group_query.query)
 main.add_command(group_query.location)
+main.add_command(group_gdoc.google_doc)
 

@@ -24,3 +24,27 @@ c3query.api_instance.set_api_params(api, rparam)
 
 machine_report = c3query.query_specific_machine_report(106445)
 ```
+
+## Change the Inventory Data on C3
+
+Change the holder and location status by the subcommand `location`.
+
+```
+$ c3-cli --conf my_conf.ini location --holder taihsiangho --location taipei --cid 201610-25147
+```
+
+## Create Test Pools
+
+Create a testpool by the subcommand `create`
+
+```
+$ c3-cli --conf conf.ini create --certificate "16.04 LTS" --enablement Enabled --status "Complete - Pass" --location all
+```
+
+## Sync up the other databases with C3 database
+
+Sync up the google spreasheet inventory data. Dump the difference between the google spreadsheet and C3 data.
+
+```
+$ c3-cli --conf my_conf.ini google_doc --doc-type cid-request --doc-id foo-bar-uuid --tab foo-bar --cell J2 --column Q
+```

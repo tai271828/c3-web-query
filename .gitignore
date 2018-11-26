@@ -4,6 +4,7 @@
 .idea/c3-web-query.iml
 .idea/misc.xml
 .idea/workspace.xml
+.idea/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
