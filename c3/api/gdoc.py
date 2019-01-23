@@ -1,30 +1,43 @@
+import pickle
+import os.path
 import logging
 import c3.config
 from googleapiclient.discovery import build
-from oauth2client import file, client, tools
-from httplib2 import Http
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 
 logger = logging.getLogger('c3_web_query')
 
 configuration = c3.config.Configuration.get_instance()
 
-# If modifying these scopes, delete the file token.json.
+# If modifying these scopes, delete the file token.picle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           "https://www.googleapis.com/auth/drive.file",
           "https://www.googleapis.com/auth/drive"]
 
 
 def connect_sheet():
-    token = configuration.config['GOOGLE']['token']
-    credential = configuration.config['GOOGLE']['credential']
+    token_location = configuration.config['GOOGLE']['token']
+    credential_location = configuration.config['GOOGLE']['credential']
 
-    store = file.Storage(token)
-    creds = store.get()
-    if not creds or creds.invalid:
-        flow = client.flow_from_clientsecrets(credential, SCOPES)
-        creds = tools.run_flow(flow, store)
-    service = build('sheets', 'v4', http=creds.authorize(Http()))
+    creds = None
+    if os.path.exists(token_location):
+        with open(token_location, 'rb') as token:
+            creds = pickle.load(token)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                credential_location, SCOPES)
+            creds = flow.run_local_server()
+        # Save the credentials for the next run
+        with open(token_location, 'wb') as token:
+            pickle.dump(creds, token)
+
+    service = build('sheets', 'v4', credentials=creds)
 
     return service
 
