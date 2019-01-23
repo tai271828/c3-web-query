@@ -46,6 +46,7 @@ def google_doc(doc_type, doc_id,
     """
     sheet = c3gdoc.get_sheet_data(doc_type, doc_id, tab, cell, column)
     target_data_sheet = c3gdoc.get_target_data(sheet, target_column)
+    target_data_sheet_to_delete = list(target_data_sheet)
     print(target_data_sheet)
 
     cids = []
@@ -101,5 +102,16 @@ def google_doc(doc_type, doc_id,
                              'HOLDER - GDoc': sheet_row[2],
                              'HOLDER - C3': c3_row[2]})
 
+    # TODO: please verifi CID again by pulling data from the sheet cells
+    # directly before really deleting the row as foolproof.
     if delete_mode == 'delete':
-        c3gdoc.delete_oem_row(doc_id, delete_tab_id, 21)
+        already_delete = 0
+        for row_to_delete in range(len(target_data_sheet_to_delete)):
+            td_row = target_data_sheet_to_delete[row_to_delete]
+            for rn in range(len(target_data_c3)):
+                data_c3_row = target_data_c3[rn]
+                if td_row[0] == data_c3_row[0]:
+                    # +1 for title, already_delete for losing one entry
+                    c3gdoc.delete_oem_row(doc_id, delete_tab_id,
+                                          row_to_delete + 1 - already_delete)
+                    already_delete += 1

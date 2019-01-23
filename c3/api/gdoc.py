@@ -12,6 +12,7 @@ logger = logging.getLogger('c3_web_query')
 configuration = c3.config.Configuration.get_instance()
 
 # If modifying these scopes, delete the file token.picle.
+# TODO: Do I really need so many SCOPES?
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           "https://www.googleapis.com/auth/drive.file",
           "https://www.googleapis.com/auth/drive"]
