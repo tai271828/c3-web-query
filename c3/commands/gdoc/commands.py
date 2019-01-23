@@ -45,7 +45,7 @@ def google_doc(doc_type, doc_id,
     for cid in cids:
         print('Fetching {} from c3'.format(cid))
         holder, location = c3query.query_holder_location(cid)
-        target_data_c3.append([cid, location, holder])
+        target_data_c3.append([cid, holder, location])
         # in case the server rejects the high frequent query
         if sleep_counter % 100 == 0:
             time.sleep(1)
