@@ -85,6 +85,19 @@ def filter_by_c3oem(data_c3):
     return data_c3_new
 
 
+def filter_by_diff(data_sheet, data_c3):
+    data_c3_new = []
+    for rn_i in range(len(data_c3)):
+        c3_row = data_c3[rn_i]
+        for rn_j in range(len(data_sheet)):
+            sheet_row = data_sheet[rn_j]
+            if c3_row[1] == sheet_row[1] and c3_row[2] == sheet_row[2]:
+                continue
+        data_c3_new.append(c3_row)
+
+    return data_c3_new
+
+
 def dimension_sync(data_sheet, data_c3):
     data_sheet_new = []
     for rn_i in range(len(data_c3)):

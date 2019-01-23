@@ -28,12 +28,17 @@ import c3.api.api_utils as c3api
               help='If to output csv file with name diffrence.csv')
 @click.option('--output-filter',
               type=click.Choice(['all', 'C3OEM', 'diff']),
-              default='C3OEM',
+              default='all',
               help='Only output: C3OEM, location on C3 is OEM. Diff: '
                    'location or holder differs.')
+@click.option('--delete-mode',
+              type=click.Choice(['dry', 'delete']),
+              default='dry',
+              help='If we want to delete the sheet entry when the C3 '
+                   'location is OEM.')
 def google_doc(doc_type, doc_id,
                tab, cell, column, target_column,
-               output, output_filter):
+               output, output_filter, delete_mode):
     """
     CRUD of the google doc.
     """
@@ -68,8 +73,12 @@ def google_doc(doc_type, doc_id,
         target_data_sheet = c3gdoc.dimension_sync(target_data_sheet,
                                                   target_data_c3)
     elif output_filter == 'diff':
-        # TODO: implement me
-        logging.warning("Diff mode has not been implemented yet.")
+        target_data_c3 = c3gdoc.filter_by_diff(target_data_sheet,
+                                               target_data_c3)
+        target_data_sheet = c3gdoc.dimension_sync(target_data_sheet,
+                                                  target_data_c3)
+    elif output_filter == 'all':
+        pass
     else:
         logging.error("No such mode.")
 
@@ -89,3 +98,7 @@ def google_doc(doc_type, doc_id,
                              'LOCATION - C3': c3_row[1],
                              'HOLDER - GDoc': sheet_row[2],
                              'HOLDER - C3': c3_row[2]})
+
+    if delete_mode == 'delete':
+        pass
+        #c3gdoc.delete_oem_row()
