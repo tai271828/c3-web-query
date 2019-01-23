@@ -53,3 +53,13 @@ Sync up the google spreasheet inventory data. Dump the difference between the go
 ```
 $ c3-cli --conf my_conf.ini google_doc --doc-type cid-request --doc-id foo-bar-uuid --tab foo-bar --cell J2 --column Q
 ```
+
+## Manipulate Google Spread sheet
+
+```
+$ c3-cli --conf my_conf.ini google_doc --doc-type cid-request --doc-id <the gdoc UUID> --tab <tab name> --cell J2 --column Q
+```
+
+By default it will generate `diffrence.csv` to show the difference of location and holder between the target spread sheet and C3 database.
+
+So far only `cid-request` doc-type is supported.
