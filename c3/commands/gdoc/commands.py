@@ -1,6 +1,7 @@
 import click
 import csv
 import time
+import logging
 import c3.api.gdoc as c3gdoc
 import c3.api.query as c3query
 
@@ -22,9 +23,8 @@ import c3.api.query as c3query
               default='0,1,7',
               help='The target column numbers, separated by commas.')
 @click.option('--output',
-              default=True,
-              help='If to output csv file with name '
-              'diffrence.csv')
+              default='diffrence.csv',
+              help='If to output csv file with name diffrence.csv')
 def google_doc(doc_type, doc_id,
                tab, cell, column, target_column,
                output):
@@ -50,6 +50,7 @@ def google_doc(doc_type, doc_id,
         if sleep_counter % 100 == 0:
             time.sleep(1)
 
+    logging.info("Output the result to {}".format(output))
     with open(output, 'w') as csv_file:
         fn = ['CID',
               'HOLDER - GDoc', 'HOLDER - C3',
