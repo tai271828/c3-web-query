@@ -4,6 +4,7 @@ import time
 import logging
 import c3.api.gdoc as c3gdoc
 import c3.api.query as c3query
+import c3.api.api_utils as c3api
 
 
 @click.command()
@@ -25,9 +26,14 @@ import c3.api.query as c3query
 @click.option('--output',
               default='diffrence.csv',
               help='If to output csv file with name diffrence.csv')
+@click.option('--output-filter',
+              type=click.Choice(['all', 'C3OEM', 'diff']),
+              default='C3OEM',
+              help='Only output: C3OEM, location on C3 is OEM. Diff: '
+                   'location or holder differs.')
 def google_doc(doc_type, doc_id,
                tab, cell, column, target_column,
-               output):
+               output, output_filter):
     """
     CRUD of the google doc.
     """
@@ -44,17 +50,34 @@ def google_doc(doc_type, doc_id,
     sleep_counter = 0
     for cid in cids:
         print('Fetching {} from c3'.format(cid))
-        holder, location = c3query.query_holder_location(cid)
+        try:
+            holder, location = c3query.query_holder_location(cid)
+        except c3api.QueryError:
+            logging.warning("Failed to query {}. Maybe no c3 data "
+                            "entry.".format(cid))
+            holder, location = "NA", "NA"
+            print('TAI')
+
         target_data_c3.append([cid, location, holder])
         # in case the server rejects the high frequent query
         if sleep_counter % 100 == 0:
             time.sleep(1)
 
+    if output_filter == 'C3OEM':
+        target_data_c3 = c3gdoc.filter_by_c3oem(target_data_c3)
+        target_data_sheet = c3gdoc.dimension_sync(target_data_sheet,
+                                                  target_data_c3)
+    elif output_filter == 'diff':
+        # TODO: implement me
+        logging.warning("Diff mode has not been implemented yet.")
+    else:
+        logging.error("No such mode.")
+
     logging.info("Output the result to {}".format(output))
     with open(output, 'w') as csv_file:
         fn = ['CID',
-              'HOLDER - GDoc', 'HOLDER - C3',
-              'Location - GDoc', 'Location - C3']
+              'LOCATION - GDoc', 'LOCATION - C3',
+              'HOLDER - GDoc', 'HOLDER - C3']
         writer = csv.DictWriter(csv_file, fieldnames=fn)
         writer.writeheader()
         for rn in range(len(target_data_sheet)):

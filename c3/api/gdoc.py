@@ -72,3 +72,26 @@ def get_target_data(sheet, target_column):
             rows.append(row_target)
 
     return rows
+
+
+def filter_by_c3oem(data_c3):
+    data_c3_new = []
+    for rn in range(len(data_c3)):
+        c3_row = data_c3[rn]
+        if c3_row[1] != "OEM":
+            continue
+        data_c3_new.append(c3_row)
+
+    return data_c3_new
+
+
+def dimension_sync(data_sheet, data_c3):
+    data_sheet_new = []
+    for rn_i in range(len(data_c3)):
+        data_c3_row = data_c3[rn_i]
+        for rn_j in range(len(data_sheet)):
+            data_sheet_row = data_sheet[rn_j]
+            if data_c3_row[0] == data_sheet_row[0]:
+                data_sheet_new.append(data_sheet_row)
+
+    return data_sheet_new
