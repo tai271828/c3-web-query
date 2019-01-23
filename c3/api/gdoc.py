@@ -142,7 +142,7 @@ def delete_oem_row(doc_id, tab, row):
                        "sheetId": tab,
                        "dimension": "ROWS",
                        "startIndex": row,
-                       "endIndex": row
+                       "endIndex": row + 1
                    }
                }
             }
