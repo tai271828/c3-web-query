@@ -33,7 +33,6 @@ import c3.api.api_utils as c3api
                    'location or holder differs.')
 @click.option('--delete-mode',
               type=click.Choice(['dry', 'delete']),
-              default='dry',
               help='If we want to delete the sheet entry when the C3 '
                    'location is OEM.')
 def google_doc(doc_type, doc_id,
@@ -100,5 +99,4 @@ def google_doc(doc_type, doc_id,
                              'HOLDER - C3': c3_row[2]})
 
     if delete_mode == 'delete':
-        pass
-        #c3gdoc.delete_oem_row()
+        c3gdoc.delete_oem_row(doc_id, tab, 21)

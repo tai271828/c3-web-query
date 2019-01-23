@@ -15,14 +15,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           "https://www.googleapis.com/auth/drive"]
 
 
-def get_sheet_data(doc_type, doc_id, tab, cell, column):
-    sheet = None
-    if doc_type == 'cid-request':
-        sheet = get_sheet_data_cid_request(doc_id, tab, cell, column)
-    return sheet
-
-
-def get_sheet_data_cid_request(doc_id, tab, cell, column):
+def connect_sheet():
     token = configuration.config['GOOGLE']['token']
     credential = configuration.config['GOOGLE']['credential']
 
@@ -32,6 +25,19 @@ def get_sheet_data_cid_request(doc_id, tab, cell, column):
         flow = client.flow_from_clientsecrets(credential, SCOPES)
         creds = tools.run_flow(flow, store)
     service = build('sheets', 'v4', http=creds.authorize(Http()))
+
+    return service
+
+
+def get_sheet_data(doc_type, doc_id, tab, cell, column):
+    sheet = None
+    if doc_type == 'cid-request':
+        sheet = get_sheet_data_cid_request(doc_id, tab, cell, column)
+    return sheet
+
+
+def get_sheet_data_cid_request(doc_id, tab, cell, column):
+    service = connect_sheet()
 
     # Call the Sheets API
     # READING
@@ -108,3 +114,28 @@ def dimension_sync(data_sheet, data_c3):
                 data_sheet_new.append(data_sheet_row)
 
     return data_sheet_new
+
+
+def delete_oem_row(doc_id, tab, row):
+    service = connect_sheet()
+    # result = service.spreadsheets().values().update(spreadsheetId=doc_id,
+    #                                                 range=tab,
+    #                                                 valueInputOption='RAW',)
+    body = {
+        "requests": [
+            {
+               "deleteDimension": {
+                   "range": {
+                       "sheetId": tab,
+                       "dimension": "ROWS",
+                       "startIndex": row,
+                       "endIndex": row
+                   }
+               }
+            }
+        ]
+    }
+
+    request = service.spreadsheets().batchUpdate(spreadsheetId=doc_id,
+                                                 body=body)
+    request.execute()
