@@ -45,7 +45,7 @@ def google_doc(doc_type, doc_id,
     for cid in cids:
         print('Fetching {} from c3'.format(cid))
         holder, location = c3query.query_holder_location(cid)
-        target_data_c3.append([cid, holder, location])
+        target_data_c3.append([cid, location, holder])
         # in case the server rejects the high frequent query
         if sleep_counter % 100 == 0:
             time.sleep(1)
@@ -62,7 +62,7 @@ def google_doc(doc_type, doc_id,
             c3_row = target_data_c3[rn]
             print('Dumping {}'.format(sheet_row[0]))
             writer.writerow({'CID': sheet_row[0],
-                             'HOLDER - GDoc': sheet_row[1],
-                             'HOLDER - C3': c3_row[1],
-                             'Location - GDoc': sheet_row[2],
-                             'Location - C3': c3_row[2]})
+                             'LOCATION - GDoc': sheet_row[1],
+                             'LOCATION - C3': c3_row[1],
+                             'HOLDER - GDoc': sheet_row[2],
+                             'HOLDER - C3': c3_row[2]})

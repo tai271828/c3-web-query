@@ -48,6 +48,13 @@ def get_sheet_data_cid_request(doc_id, tab, cell, column):
 
 
 def get_target_data(sheet, target_column):
+    """
+    Indicate different target columns for different sheets.
+
+    :param sheet: string, the tab name.
+    :param target_column: int-cid,int-location,int-holder,
+    :return: a list with elements [cid, location, holder]
+    """
     tc = target_column.split(',')
     rows = []
     if not sheet:
