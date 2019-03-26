@@ -29,7 +29,7 @@ def create_prototype(algorithm, certificate):
               default='taipei',
               help='Show systems with the given location only')
 @click.option('--certificate',
-              type=click.Choice(['14.04.5', '16.04 LTS']),
+              type=click.Choice(['14.04.5', '16.04 LTS', '18.04 LTS']),
               default='16.04 LTS',
               help='Filters to match certify status.')
 @click.option('--enablement',
