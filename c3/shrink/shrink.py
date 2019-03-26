@@ -65,6 +65,12 @@ def get_group_cpu_name(ifamily, category, device):
 
 
 def get_location(cid_objs):
+    """
+    Select CID objects by location filter
+
+    :param cid_objs:  cid objects
+    :return: cid objects
+    """
     conf_singlet = c3.config.Configuration.get_instance()
     filter_session = conf_singlet.config['FILTER']
 
@@ -177,6 +183,14 @@ def sort_cid_objs(cid_objs):
 
 
 def shrink_by_category(cid_objs, device_categories, ifamily=False):
+    """
+    Shrinnk the pool by each category
+
+    :param cid_objs: CID objects
+    :param device_categories: which category to be referred when shrinking
+    :param ifamily: how to group ifamily, e.g. i5-xxxx are all i5 family
+    :return: shrunk CID objects
+    """
     # sorting first to make sure each shrink result consistent
     cid_objs = sort_cid_objs(cid_objs)
     # Find unique devices per category
@@ -222,6 +236,8 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
             cid_objs_shrunk.append(cid_obj)
 
     # pick up systems by location priority
+    # if it is assigned in the location filter
+    # it will be picked up earlier
     cid_obj_locations = get_location(cid_objs)
     for cid_obj in cid_obj_locations:
         flag_pickup = False
@@ -234,7 +250,7 @@ def shrink_by_category(cid_objs, device_categories, ifamily=False):
                 if if_blacklist(cid_obj.cid) or if_replacement(cid_obj, device):
                     pass
                 else:
-                    logger.debug('Select specific location first'
+                    logger.info('Select specific location first'
                                 ' by category %s' % category)
                     flag_pickup = True
                     # then I don't need to pick up this device anymore in the

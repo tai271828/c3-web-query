@@ -50,20 +50,20 @@ def get_certificates_by_location(location='Taipei'):
     pickle_fn = location.lower() + '.cert_by_location.pickle'
 
     if configuration.config['GENERAL']['cache']:
-        print('Trying to find cache to get certificates by location.')
+        logger.info('Trying to find cache to get certificates by location.')
 
         try:
             with open(pickle_fn, 'rb') as handle:
                 cache_path = os.path.realpath(handle.name)
-                print('Found cache. Use cache as {}'.format(cache_path))
+                logger.info('Found cache. Use cache as {}'.format(cache_path))
                 results = pickle.load(handle)
         except FileNotFoundError:
-            print('Cache not found. Fallback to web query.')
+            logger.info('Cache not found. Fallback to web query.')
             results = c3q.query_certificates_by_location(location)
 
             with open(pickle_fn, 'wb') as handle:
                 cache_path = os.path.realpath(handle.name)
-                print('Save cache at {}'.format(cache_path))
+                logger.info('Save cache at {}'.format(cache_path))
                 pickle.dump(results, handle)
 
     else:
@@ -71,7 +71,7 @@ def get_certificates_by_location(location='Taipei'):
 
         with open(pickle_fn, 'wb') as handle:
             cache_path = os.path.realpath(handle.name)
-            print('Save cache at {}'.format(cache_path))
+            logger.info('Save cache at {}'.format(cache_path))
             pickle.dump(results, handle)
 
     return results
@@ -153,7 +153,7 @@ def get_cids_by_query(location, certificate, enablement, status,
             summaries = get_certificates_by_location(location)
             summaries_location = ['location']*len(summaries)
 
-        print('Get certificate-location result per CIDs')
+        logger.debug('Get certificate-location result per CIDs')
         counter_location = 0
         for summary in summaries:
             if is_certified(summary, certificate, enablement, status):
@@ -193,7 +193,7 @@ def get_cids_by_query(location, certificate, enablement, status,
             counter_location += 1
 
     except QueryError:
-        print("Problem with C3 Query")
+        logger.critical("Problem with C3 Query")
 
     return cids
 
