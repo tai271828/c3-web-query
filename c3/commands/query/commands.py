@@ -59,7 +59,7 @@ def query(cid, cid_list, csv, certificate, enablement, status):
               type=click.Choice(['return', 'canonical']),
               help='Change to status')
 @click.option('--eol/--no-eol',
-              default=True,
+              default=False,
               help='Batch holder/location/status change to be '
                    'AsIs-OEM-Returned to partner/customer')
 @click.option('--cid',
@@ -91,10 +91,12 @@ def location(holder, location, status, eol, cid, cid_list):
 def query_location_holder(cids):
     for cid_to_change in cids:
         ctc = cid_to_change
-        holder_asis, location_asis = c3query.query_holder_location(ctc)
+        holder_asis, location_asis, status_asis = \
+            c3query.query_holder_location(ctc)
         print('====== CID %s ======' % ctc)
         print('Current location: %s' % location_asis)
         print('Current holder: %s' % holder_asis)
+        print('Current status: %s' % status_asis)
 
 
 def change_location_holder(cids, location, holder, status):
