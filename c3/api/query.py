@@ -240,13 +240,23 @@ def parse_location(result):
     return info_location
 
 
+def parse_status(result):
+    if result['status']:
+        info_status = result['status']
+    else:
+        info_status = 'NA'
+
+    return info_status
+
+
 def query_holder_location(cid):
     result = query_over_api_hardware(cid)
 
     holder = parse_holder(result)
     location = parse_location(result)
+    status = parse_status(result)
 
-    return holder, location
+    return holder, location, status
 
 
 def push_holder(cid, holder):
@@ -256,6 +266,7 @@ def push_holder(cid, holder):
     response = push_over_api_hardware(cid, data_holder)
 
     return response
+
 
 def push_location(cid, location):
     # the endpoint slash is necessary
@@ -267,5 +278,16 @@ def push_location(cid, location):
     data_location = json.dumps({"location": location_uri})
 
     response = push_over_api_hardware(cid, data_location)
+
+    return response
+
+
+def push_status(cid, status):
+    lookup_table = c3.maptable.status
+    status_name = status.lower()
+
+    data_status = json.dumps({"status": lookup_table[status_name]})
+
+    response = push_over_api_hardware(cid, data_status)
 
     return response

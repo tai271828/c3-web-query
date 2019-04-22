@@ -7,6 +7,9 @@ location = {'beijing': '6', 'oem': '8',
             'mainstream': '10', 'ceqa': '12',
             'taipei': '13'}
 
+status = {'return': 'Returned to partner/customer',
+          'canonical': 'With Canonical'}
+
 loglevel = {'debug': logging.DEBUG, 'info': logging.INFO,
             'warning': logging.WARNING, 'error': logging.ERROR,
             'critical': logging.CRITICAL}

@@ -51,14 +51,22 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 @click.option('--holder',
               help='To be holder. Use Launchpad ID.')
 @click.option('--location',
-              type=click.Choice(['taipei', 'beijing', 'lexington', 'ceqa']),
+              type=click.Choice(['taipei', 'beijing', 'lexington', 'ceqa',
+                                 'oem']),
               default='taipei',
               help='Change to location')
+@click.option('--status',
+              type=click.Choice(['return', 'canonical']),
+              help='Change to status')
+@click.option('--eol/--no-eol',
+              default=True,
+              help='Batch holder/location/status change to be '
+                   'AsIs-OEM-Returned to partner/customer')
 @click.option('--cid',
               help='single CID to query.')
 @click.option('--cid-list',
               help='CID list to query. One CID one row.')
-def location(holder, location, cid, cid_list):
+def location(holder, location, status, eol, cid, cid_list):
     logger.info("Begin to execute.")
 
     cids = []
@@ -71,7 +79,11 @@ def location(holder, location, cid, cid_list):
         cids.extend(cids_from_list)
 
     if holder and location:
-        change_location_holder(cids, location, holder)
+        change_location_holder(cids, location, holder, status)
+    elif eol:
+        location = 'oem'
+        status = 'return'
+        change_location_holder(cids, location, holder, status)
     else:
         query_location_holder(cids)
 
@@ -85,20 +97,31 @@ def query_location_holder(cids):
         print('Current holder: %s' % holder_asis)
 
 
-def change_location_holder(cids, location, holder):
+def change_location_holder(cids, location, holder, status):
     for cid_to_change in cids:
         ctc = cid_to_change
-        holder_asis, location_asis = c3query.query_holder_location(ctc)
-        print('====== CID %s ======' % ctc)
+        holder_asis, location_asis, status_asis = \
+            c3query.query_holder_location(ctc)
+        print('============ CID %s ============' % ctc)
         print('Current location: %s' % location_asis)
         print('Current holder: %s' % holder_asis)
-        print('Changing holder and location...')
+        print('Current status: %s' % status_asis)
+        print('\nChanging holder and location...\n')
+        if not holder:
+            holder = holder_asis
+        if not location:
+            location = location_asis
+        if not status:
+            status = status_asis
         c3query.push_holder(ctc, holder)
         c3query.push_location(ctc, location)
-        print('Changed.\n')
-        holder_asis, location_asis = c3query.query_holder_location(ctc)
+        c3query.push_status(ctc, status)
+        print('\nChanged.\n')
+        holder_asis, location_asis, status_asis = \
+            c3query.query_holder_location(ctc)
         print('Current location: %s' % location_asis)
         print('Current holder: %s' % holder_asis)
+        print('Current status: %s' % status_asis)
 
 
 def read_cids(cid_list_file):
