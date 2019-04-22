@@ -22,7 +22,7 @@ import c3.api.api_utils as c3api
               help='The column number.')
 @click.option('--target-column',
               default='0,1,7',
-              help='The target column numbers, separated by commas.')
+              help='The target column numbers, separated by commas. They are CID, location, holder-status.')
 @click.option('--output',
               default='diffrence.csv',
               help='If to output csv file with name diffrence.csv')
