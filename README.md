@@ -40,6 +40,14 @@ $ c3-cli --conf my_conf.ini location --holder taihsiangho --location taipei --ci
 
 A useful short name is `eol` for you to change the holder/location/status to be `AsIs/OEM/Returned to partner/customer`.
 
+You could query the inventory status without `holder` and `localtion` options appended.
+
+```
+$ c3-cli --conf my_conf.ini location --cid 201610-25147
+```
+
+For both of changing and querying features, you may use `--cid-list` instead of `--cid` to change or query in batch.
+
 ## Create Test Pools
 
 Create a testpool by the subcommand `create`

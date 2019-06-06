@@ -249,14 +249,21 @@ def parse_status(result):
     return info_status
 
 
+def parse_platform_name(result):
+    if result['platform'].get('name', 'NA'):
+        info_platform_name = result['platform'].get('name', 'NA')
+
+    return info_platform_name
+
 def query_holder_location(cid):
     result = query_over_api_hardware(cid)
 
     holder = parse_holder(result)
     location = parse_location(result)
     status = parse_status(result)
+    platform_name = parse_platform_name(result)
 
-    return holder, location, status
+    return holder, location, status, platform_name
 
 
 def push_holder(cid, holder):
