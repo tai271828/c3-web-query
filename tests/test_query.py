@@ -1,7 +1,9 @@
 import os
+import socket
 import c3.config as c3config
 import c3.api.query as c3query
 import c3.json.component as c3component
+import pytest
 import pkg_resources
 from c3.api.api_utils import APIQuery
 from data.machine import machine_report, machine_metainfo
@@ -20,8 +22,20 @@ def compare_shallow_dict(base, target):
 
     return len(machine_metainfo) == len(shared_items) == len(target)
 
+def check_internet_connection(host="8.8.8.8", port=53, timeout=3):
+        try:
+            socket.setdefaulttimeout(timeout)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except socket.error as ex:
+            print(ex)
+            return False
+
+
 def test_query():
     # this test needs c3 database connection
+    if not check_internet_connection(host="10.101.48.254"):
+        pytest.skip("Skip for no available network connection")
 
     configuration.read_configuration(ini_test.name)
 
