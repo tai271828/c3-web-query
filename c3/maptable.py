@@ -4,8 +4,23 @@ All lookup tables.
 import logging
 
 location = {'beijing': '6', 'oem': '8',
-            'mainstream': '10', 'ceqa': '12',
+            'external-warehouse': '9',
+            'mainstream': '10',
+            'hwe': '11',
+            'ceqa': '12',
             'taipei': '13'}
+
+office = {'taipei-office': ['external-warehouse',
+                            'mainstream',
+                            'hwe',
+                            'ceqa',
+                            'taipei'],
+          'canonical': location.keys()}
+
+series = {'trusty': ['14.04 LTS',
+                     '14.04.1 LTS', '14.04.2 LTS'
+                     '14.04.3 LTS', '14.04.4 LTS',
+                     '14.04.5 LTS', '14.04.6 LTS']}
 
 status = {'return': 'Returned to partner/customer',
           'with canonical': 'With Canonical'}

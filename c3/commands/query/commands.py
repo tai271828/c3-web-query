@@ -3,6 +3,7 @@ import logging
 import c3.api.cids as c3cids
 import c3.api.query as c3query
 import c3.io.csv as c3csv
+import c3.maptable as c3maptable
 
 
 logger = logging.getLogger('c3_web_query')
@@ -29,6 +30,20 @@ logger = logging.getLogger('c3_web_query')
               default='Complete - Pass',
               help='Certificate status')
 def query(cid, cid_list, csv, certificate, enablement, status):
+    """
+    Query CID(s) status.
+
+    This command is very useful when we want to know the EOL list etc.
+    (See eol command below)
+
+    :param cid: string, CID
+    :param cid_list: a text file with CID string each row
+    :param csv: the output file of query result
+    :param certificate: query condition "certificate"
+    :param enablement: query condition "enablement status"
+    :param status: query condition, the certificate issue status
+    :return: None
+    """
     logger.info("Begin to execute.")
 
     cids = []
@@ -70,6 +85,21 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 @click.option('--cid-list',
               help='CID list to query. One CID one row.')
 def location(holder, location, status, eol, verbose, cid, cid_list):
+    """
+    Update or query location information
+
+    This command set will not only query C3 database but may also change
+    some fields of the database according to your input parameters.
+
+    :param holder: string, holder ID (same as Launchpad ID)
+    :param location: string, map to location ID automatically
+    :param status: string
+    :param eol: equivalent to location "OEM" and status "Returned to partner/customer"
+    :param verbose: verbose execution output
+    :param cid: string, CID
+    :param cid_list: a text file with CID string each row
+    :return: None
+    """
     logger.info("Begin to execute.")
 
     cids = []
@@ -144,3 +174,54 @@ def read_cids(cid_list_file):
         rtn.append(line.strip())
 
     return rtn
+
+
+@click.command()
+@click.option('--series',
+              type=click.Choice(['trusty']),
+              default='trusty',
+              help='Which series including its point releases.')
+@click.option('--office',
+              type=click.Choice(['taipei-office', 'canonical']),
+              default='taipei-office',
+              help='Where the CID comes from.')
+def eol(series, office):
+    """
+    Find out all EOL CIDs
+
+    The algorithm to find out the EOL CIDs is based on the above query and
+    location commands.
+
+    For EOL we do the following steps:
+        1. Query CIDs according to location with the "location command"
+        2. According to the CIDs above to filter the certificate and
+        enablement status
+
+    :param certificate: series including their point releases
+    :param location: location string
+    :return: None
+    """
+    logger.info("Begin to execute.")
+
+    releases = c3maptable.series['trusty']
+    locations = c3maptable.office[office]
+
+    cid_objs = []
+    for release in releases:
+        for location in locations:
+            for enablement in ['Enabled', 'Certified']:
+                for status in ['Complete - Pass', 'Revoked']:
+                    logger.info('Fetching CIDs: {} {} {} {}'.format(release,
+                                                                    location,
+                                                                    enablement,
+                                                                    status))
+                    cid_obj = c3cids.get_cids(location,
+                                              release,
+                                              enablement,
+                                              status,
+                                              use_cache=False,
+                                              filter_kernel=False)
+
+                    cid_objs.extend(cid_obj)
+
+    c3csv.generate_csv(cid_objs, 'EOL-CIDs.csv')

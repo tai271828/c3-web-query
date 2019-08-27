@@ -80,5 +80,6 @@ main.add_command(group_batch.create_prototype)
 main.add_command(group_single.query_prototype)
 main.add_command(group_query.query)
 main.add_command(group_query.location)
+main.add_command(group_query.eol)
 main.add_command(group_gdoc.google_doc)
 
