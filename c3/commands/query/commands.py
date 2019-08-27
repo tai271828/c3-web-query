@@ -207,7 +207,7 @@ def eol(series, office):
     """
     logger.info("Begin to execute.")
 
-    releases = c3maptable.series['trusty']
+    releases = c3maptable.series_eol['trusty']
     locations = c3maptable.office[office]
 
     cid_cert_objs = []
@@ -217,7 +217,7 @@ def eol(series, office):
                                                         use_cache=False)
 
         for summary in summaries:
-            if is_eol(summary, releases):
+            if is_eol(summary, releases, c3maptable.series_alive):
                 cid = summary['machine'].split('/')[-2]
                 release = summary['release']['release']
                 level = summary['level']
@@ -237,8 +237,13 @@ def eol(series, office):
     c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
 
 
-def is_eol(summary, releases):
-    if summary['release']['release'] in releases:
-        return True
+def is_eol(summary, releases_eol, releases_alive):
+    cid = summary['machine'].split('/')[-2]
+    release = summary['release']['release']
+    if release in releases_eol:
+        if release in releases_alive:
+            logging.info("{} has {} certificate".format(cid, release))
+        else:
+            return True
     else:
         return False
