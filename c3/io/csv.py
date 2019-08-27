@@ -8,14 +8,6 @@ import logging
 logger = logging.getLogger('c3_web_query')
 
 
-FIELDNAMES = ['CID',
-              'Vendor', 'Model', 'Code Name', 'Form',
-              'CPU', 'GPU',
-              'Wireless', 'Ethernet',
-              'Audio ID', 'Audio Name',
-              'Selection For']
-
-
 def generate_csv_row(cid, writer):
     if cid:
         try:
@@ -57,7 +49,43 @@ def generate_csv_row(cid, writer):
                          'Release': ""})
 
 
-def generate_csv(cids, csv_file):
+def generate_csv_row_eol(cid, writer):
+    if cid:
+        try:
+            writer.writerow({'CID': cid['cid'],
+                             'Location': cid['location'],
+                             'Series': cid['release'],
+                             'Level': cid['level'],
+                             'Status': cid['status']})
+        except AttributeError:
+            raise
+    else:
+        logger.warning("No data for {}".format(cid))
+        writer.writerow({'CID': cid['cid'],
+                         'Series': ""})
+
+
+def get_fieldnames(mode='submission'):
+    if mode == 'submission':
+        fieldnames = ['CID',
+                      'Vendor', 'Model', 'Code Name', 'Form',
+                      'CPU', 'GPU',
+                      'Wireless', 'Ethernet',
+                      'Audio ID', 'Audio Name',
+                      'Selection For']
+    elif mode == 'eol':
+        fieldnames = ['CID',
+                      'Location',
+                      'Series',
+                      'Level',
+                      'Status']
+    else:
+        fieldnames = ""
+
+    return fieldnames
+
+
+def generate_csv(cids, csv_file, mode='submission'):
     """
     Generate CSV with name csv_file by cid objects
 
@@ -66,9 +94,17 @@ def generate_csv(cids, csv_file):
     :return: None
     """
     with open(csv_file, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
+        fieldnames = get_fieldnames(mode)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for cid in cids:
-            generate_csv_row(cid, writer)
+        if mode == 'submission':
+            for cid in cids:
+                generate_csv_row(cid, writer)
+        elif mode == 'eol':
+            for cid in cids:
+                generate_csv_row_eol(cid, writer)
+        else:
+            for cid in cids:
+                generate_csv_row(cid, writer)
 
 

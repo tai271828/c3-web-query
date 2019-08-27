@@ -197,6 +197,10 @@ def eol(series, office):
         2. According to the CIDs above to filter the certificate and
         enablement status
 
+    TODO:
+        1. merge duplicate CIDs
+        2. make sure this CID is not enabled with higher series
+
     :param certificate: series including their point releases
     :param location: location string
     :return: None
@@ -206,22 +210,35 @@ def eol(series, office):
     releases = c3maptable.series['trusty']
     locations = c3maptable.office[office]
 
-    cid_objs = []
-    for release in releases:
-        for location in locations:
-            for enablement in ['Enabled', 'Certified']:
-                for status in ['Complete - Pass', 'Revoked']:
-                    logger.info('Fetching CIDs: {} {} {} {}'.format(release,
-                                                                    location,
-                                                                    enablement,
-                                                                    status))
-                    cid_obj = c3cids.get_cids(location,
-                                              release,
-                                              enablement,
-                                              status,
-                                              use_cache=False,
-                                              filter_kernel=False)
+    cid_cert_objs = []
+    for location in locations:
 
-                    cid_objs.extend(cid_obj)
+        summaries = c3cids.get_certificates_by_location(location,
+                                                        use_cache=False)
 
-    c3csv.generate_csv(cid_objs, 'EOL-CIDs.csv')
+        for summary in summaries:
+            if is_eol(summary, releases):
+                cid = summary['machine'].split('/')[-2]
+                release = summary['release']['release']
+                level = summary['level']
+                status = summary['status']
+                logger.info('{} {} {} {} {}'.format(location,
+                                                    cid,
+                                                    release,
+                                                    level,
+                                                    status))
+                cid_cert_obj = {'cid': cid,
+                                'location': location,
+                                'release': release,
+                                'level': level,
+                                'status': status}
+                cid_cert_objs.append(cid_cert_obj)
+
+    c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+
+
+def is_eol(summary, releases):
+    if summary['release']['release'] in releases:
+        return True
+    else:
+        return False
