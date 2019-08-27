@@ -1,10 +1,7 @@
 import c3.json.component as c3component
 import c3.config as c3config
 import pkg_resources
-from c3.helper import compare, convert
 from data.machine import machine_report, machine_metainfo
-from data.cids import cids_before_shrink, cids_after_shrink
-from c3.shrink import shrink
 
 
 configuration = c3config.Configuration.get_instance()

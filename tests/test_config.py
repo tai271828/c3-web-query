@@ -37,7 +37,7 @@ def test_read_default_batch_query_mode(config_singlet):
     assert config_singlet.config['C3']['BatchQueryMode'] == '0'
 
 def test_read_default_uri(config_singlet):
-    answer_uri = 'https://certification.canonical.com/'
+    answer_uri = 'https://certification.canonical.com'
     assert config_singlet.config['C3']['URI'] == answer_uri
 
 def test_read_default_verbose(config_singlet):

@@ -146,13 +146,20 @@ def query_specific_machine_report(m_id):
     :param m_id: submission / machine report id, string
     :return:
     """
-    c3username = configuration.config['C3']['UserName']
-    c3apikey = configuration.config['C3']['APIKey']
-    c3url = configuration.config['C3']['URI']
-    report_api = configuration.config['API']['reportFind']
+    if api_instance.request_params["username"]:
+        c3username = api_instance.request_params['username']
+    else:
+        c3username = configuration.config['C3']['UserName']
+    if api_instance.request_params['api_key']:
+        c3apikey = api_instance.request_params['api_key']
+    else:
+        c3apikey = configuration.config['C3']['APIKey']
     req_params = {"username": c3username,
                   "api_key": c3apikey,
                   "id": m_id}
+
+    c3url = configuration.config['C3']['URI']
+    report_api = configuration.config['API']['reportFind']
 
     report = api_instance.api.single_query(c3url + report_api,
                                            params=req_params)
