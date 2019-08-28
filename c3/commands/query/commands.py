@@ -247,17 +247,23 @@ def eol(series, office, verbose, cache):
 def get_verbose_eol_cid_objs(cid_cert_objs):
     verbose_cid_cert_objs = []
     for cid_cert_obj in cid_cert_objs:
-        cids_data = c3cids.get_cids_by_query(cid_cert_obj['location'],
-                                             cid_cert_obj['release'],
-                                             cid_cert_obj['level'],
-                                             cid_cert_obj['status'],
-                                             target_cids=[
-                                                 cid_cert_obj['cid']],
-                                             disable_flag=False,
-                                             use_cache=False)
-        for cid_data in cids_data:
-            cid_data.__dict__.update(cert=cid_cert_obj['cert'])
-            verbose_cid_cert_objs.append(cid_data)
+        cid_obj = c3cid.CID()
+        cid_obj.cid = cid_cert_obj['cid']
+        logging.info("Fetching data of {}".format(cid_obj.cid))
+
+        cid_obj.location = cid_cert_obj['location']
+        cid_obj.release = cid_cert_obj['release']
+        cid_obj.level = cid_cert_obj['level']
+        cid_obj.status = cid_cert_obj['status']
+        cid_obj.cert = cid_cert_obj['cert']
+
+        result = c3query.query_over_api_hardware(cid_cert_obj['cid'])
+        cid_obj.make = result['platform']['vendor']['name']
+        cid_obj.model = result['platform']['name']
+        cid_obj.codename = result['platform']['codename']
+        cid_obj.form_factor = result['platform']['form_factor']
+
+        verbose_cid_cert_objs.append(cid_obj)
 
     return verbose_cid_cert_objs
 
