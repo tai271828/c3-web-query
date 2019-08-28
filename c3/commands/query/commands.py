@@ -246,10 +246,15 @@ def eol(series, office, verbose, cache):
 
 def get_verbose_eol_cid_objs(cid_cert_objs):
     verbose_cid_cert_objs = []
+    total_num = len(cid_cert_objs)
+    counter = 1
     for cid_cert_obj in cid_cert_objs:
         cid_obj = c3cid.CID()
         cid_obj.cid = cid_cert_obj['cid']
-        logging.info("Fetching data of {}".format(cid_obj.cid))
+        msg_template = "Fetching data of {}: {} out of {}"
+        logging.info(msg_template.format(cid_obj.cid,
+                                         counter,
+                                         total_num))
 
         cid_obj.location = cid_cert_obj['location']
         cid_obj.release = cid_cert_obj['release']
@@ -264,6 +269,8 @@ def get_verbose_eol_cid_objs(cid_cert_objs):
         cid_obj.form_factor = result['platform']['form_factor']
 
         verbose_cid_cert_objs.append(cid_obj)
+
+        counter += 1
 
     return verbose_cid_cert_objs
 
