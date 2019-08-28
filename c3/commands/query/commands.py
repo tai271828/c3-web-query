@@ -343,6 +343,7 @@ def is_eol(summary, releases_eol, releases_alive):
     if release in releases_eol:
         if release in releases_alive:
             logging.info("{} has {} certificate".format(cid, release))
+            return False
         else:
             return True
     else:
