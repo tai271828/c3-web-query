@@ -54,15 +54,14 @@ def generate_csv_row_eol(cid, writer):
         try:
             writer.writerow({'CID': cid['cid'],
                              'Location': cid['location'],
-                             'Series': cid['release'],
-                             'Level': cid['level'],
-                             'Status': cid['status']})
+                             'Cert Type': cid['cert']})
         except AttributeError:
             raise
     else:
         logger.warning("No data for {}".format(cid))
         writer.writerow({'CID': cid['cid'],
-                         'Series': ""})
+                         'Location': "",
+                         'Cert Type': ""})
 
 
 def get_fieldnames(mode='submission'):
@@ -76,9 +75,7 @@ def get_fieldnames(mode='submission'):
     elif mode == 'eol':
         fieldnames = ['CID',
                       'Location',
-                      'Series',
-                      'Level',
-                      'Status']
+                      'Cert Type']
     else:
         fieldnames = ""
 

@@ -8,13 +8,13 @@ location = {'beijing': '6', 'oem': '8',
             'mainstream': '10',
             'hwe': '11',
             'ceqa': '12',
-            'taipei': '13'}
+            'cert-taipei': '13'}
 
 office = {'taipei-office': ['external-warehouse',
                             'mainstream',
                             'hwe',
                             'ceqa',
-                            'taipei'],
+                            'cert-taipei'],
           'canonical': location.keys()}
 
 series_eol = {'trusty': ['14.04 LTS',

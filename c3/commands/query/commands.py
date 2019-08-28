@@ -210,6 +210,7 @@ def eol(series, office):
     releases = c3maptable.series_eol['trusty']
     locations = c3maptable.office[office]
 
+    uniq_cid_set = set()
     cid_cert_objs = []
     for location in locations:
 
@@ -232,9 +233,36 @@ def eol(series, office):
                                 'release': release,
                                 'level': level,
                                 'status': status}
+
                 cid_cert_objs.append(cid_cert_obj)
 
-    c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+                uniq_cid_set.add(cid)
+
+    cid_cert_objs_new = []
+    for cid in uniq_cid_set:
+        cid_cert_obj_new = {}
+        for cid_cert_obj in cid_cert_objs:
+            if cid_cert_obj['cid'] == cid:
+                if cid_cert_obj_new:
+                    # sanity check
+                    _merge_cid_cert_obj_sanity_check(cid_cert_obj,
+                                                     cid_cert_obj_new)
+
+                    label_orig = _get_label(cid_cert_obj)
+                    label_new = cid_cert_obj_new['cert']
+                    if label_orig not in label_new:
+                        label_merge = label_new + ' - ' + label_orig
+                        cid_cert_obj_new['cert'] = label_merge
+
+                else:
+
+                    cid_cert_obj_new = {'cid': cid_cert_obj['cid'],
+                                        'location': cid_cert_obj['location'],
+                                        'cert': _get_label(cid_cert_obj)}
+
+        cid_cert_objs_new.append(cid_cert_obj_new)
+
+    c3csv.generate_csv(cid_cert_objs_new, 'EOL-CIDs.csv', mode='eol')
 
 
 def is_eol(summary, releases_eol, releases_alive):
@@ -247,3 +275,20 @@ def is_eol(summary, releases_eol, releases_alive):
             return True
     else:
         return False
+
+
+def _get_label(cid_cert_obj):
+    label = cid_cert_obj['release'] + \
+            '( ' + \
+            cid_cert_obj['level'] + ' - ' + \
+            cid_cert_obj['status'] + \
+            ' )'
+    return label
+
+
+def _merge_cid_cert_obj_sanity_check(base, target):
+    if base['location'] != target['location'] or \
+       base['cid'] != target['cid']:
+        print("{} {} {} {}".format(base['location'], target['location'],
+                                   base['cid'], target['cid']))
+        raise
