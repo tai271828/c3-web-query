@@ -2,6 +2,7 @@ import click
 import logging
 import c3.api.cids as c3cids
 import c3.api.query as c3query
+import c3.io.cache as c3cache
 import c3.io.csv as c3csv
 import c3.maptable as c3maptable
 
@@ -185,7 +186,13 @@ def read_cids(cid_list_file):
               type=click.Choice(['taipei-office', 'canonical']),
               default='taipei-office',
               help='Where the CID comes from.')
-def eol(series, office):
+@click.option('--verbose/--no-verbose',
+              default=True,
+              help='Output the query result in simple format')
+@click.option('--cache/--no-cache',
+              default=True,
+              help='Try to use cache or not')
+def eol(series, office, verbose, cache):
     """
     Find out all EOL CIDs
 
@@ -207,7 +214,26 @@ def eol(series, office):
     """
     logger.info("Begin to execute.")
 
-    releases = c3maptable.series_eol['trusty']
+    cache_prefix = 'eol-' + series
+    if cache:
+        logging.info('Try to use eol cache data...')
+        cid_cert_objs = c3cache.read_cache(cache_prefix)
+        if not cid_cert_objs:
+            cid_cert_objs = get_eol_cid_objs(series, office)
+            c3cache.write_cache(cache_prefix, cid_cert_objs)
+
+    else:
+        cid_cert_objs = get_eol_cid_objs(series, office)
+
+    if verbose:
+        c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+    else:
+        c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+
+
+def get_eol_cid_objs(series, office):
+
+    releases = c3maptable.series_eol[series]
     locations = c3maptable.office[office]
 
     uniq_cid_set = set()
@@ -262,7 +288,7 @@ def eol(series, office):
 
         cid_cert_objs_new.append(cid_cert_obj_new)
 
-    c3csv.generate_csv(cid_cert_objs_new, 'EOL-CIDs.csv', mode='eol')
+    return cid_cert_objs_new
 
 
 def is_eol(summary, releases_eol, releases_alive):
