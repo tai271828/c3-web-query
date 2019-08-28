@@ -8,14 +8,6 @@ import logging
 logger = logging.getLogger('c3_web_query')
 
 
-FIELDNAMES = ['CID',
-              'Vendor', 'Model', 'Code Name', 'Form',
-              'CPU', 'GPU',
-              'Wireless', 'Ethernet',
-              'Audio ID', 'Audio Name',
-              'Selection For']
-
-
 def generate_csv_row(cid, writer):
     if cid:
         try:
@@ -57,7 +49,64 @@ def generate_csv_row(cid, writer):
                          'Release': ""})
 
 
-def generate_csv(cids, csv_file):
+def generate_csv_row_eol(cid, writer):
+    if cid:
+        try:
+            writer.writerow({'CID': cid['cid'],
+                             'Location': cid['location'],
+                             'Cert Type': cid['cert']})
+        except AttributeError:
+            raise
+    else:
+        logger.warning("No data for {}".format(cid))
+        writer.writerow({'CID': cid['cid'],
+                         'Location': "",
+                         'Cert Type': ""})
+
+
+def generate_csv_row_eol_verbose(cid, writer):
+    if cid:
+        try:
+            writer.writerow({'CID': cid.cid,
+                             'Location': cid.location,
+                             'Vendor': cid.make,
+                             'Model': cid.model,
+                             'Code Name': cid.codename,
+                             'Form': cid.form_factor,
+                             'Cert Type': cid.cert
+                             })
+        except AttributeError:
+            raise
+    else:
+        logger.warning("No data for {}".format(cid))
+        writer.writerow({'CID': cid['cid'],
+                         'Location': "",
+                         'Cert Type': ""})
+
+
+def get_fieldnames(mode='submission'):
+    if mode == 'submission':
+        fieldnames = ['CID',
+                      'Vendor', 'Model', 'Code Name', 'Form',
+                      'CPU', 'GPU',
+                      'Wireless', 'Ethernet',
+                      'Audio ID', 'Audio Name',
+                      'Selection For']
+    elif mode == 'eol':
+        fieldnames = ['CID',
+                      'Location',
+                      'Cert Type']
+    elif mode == 'eol-verbose':
+        fieldnames = ['CID', 'Location',
+                      'Vendor', 'Model', 'Code Name', 'Form',
+                      'Cert Type']
+    else:
+        fieldnames = ""
+
+    return fieldnames
+
+
+def generate_csv(cids, csv_file, mode='submission'):
     """
     Generate CSV with name csv_file by cid objects
 
@@ -66,9 +115,20 @@ def generate_csv(cids, csv_file):
     :return: None
     """
     with open(csv_file, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
+        fieldnames = get_fieldnames(mode)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for cid in cids:
-            generate_csv_row(cid, writer)
+        if mode == 'submission':
+            for cid in cids:
+                generate_csv_row(cid, writer)
+        elif mode == 'eol':
+            for cid in cids:
+                generate_csv_row_eol(cid, writer)
+        elif mode == 'eol-verbose':
+            for cid in cids:
+                generate_csv_row_eol_verbose(cid, writer)
+        else:
+            for cid in cids:
+                generate_csv_row(cid, writer)
 
 

@@ -1,8 +1,11 @@
 import click
 import logging
+import c3.pool.cid as c3cid
 import c3.api.cids as c3cids
 import c3.api.query as c3query
+import c3.io.cache as c3cache
 import c3.io.csv as c3csv
+import c3.maptable as c3maptable
 
 
 logger = logging.getLogger('c3_web_query')
@@ -29,6 +32,20 @@ logger = logging.getLogger('c3_web_query')
               default='Complete - Pass',
               help='Certificate status')
 def query(cid, cid_list, csv, certificate, enablement, status):
+    """
+    Query CID(s) status.
+
+    This command is very useful when we want to know the EOL list etc.
+    (See eol command below)
+
+    :param cid: string, CID
+    :param cid_list: a text file with CID string each row
+    :param csv: the output file of query result
+    :param certificate: query condition "certificate"
+    :param enablement: query condition "enablement status"
+    :param status: query condition, the certificate issue status
+    :return: None
+    """
     logger.info("Begin to execute.")
 
     cids = []
@@ -70,6 +87,21 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 @click.option('--cid-list',
               help='CID list to query. One CID one row.')
 def location(holder, location, status, eol, verbose, cid, cid_list):
+    """
+    Update or query location information
+
+    This command set will not only query C3 database but may also change
+    some fields of the database according to your input parameters.
+
+    :param holder: string, holder ID (same as Launchpad ID)
+    :param location: string, map to location ID automatically
+    :param status: string
+    :param eol: equivalent to location "OEM" and status "Returned to partner/customer"
+    :param verbose: verbose execution output
+    :param cid: string, CID
+    :param cid_list: a text file with CID string each row
+    :return: None
+    """
     logger.info("Begin to execute.")
 
     cids = []
@@ -144,3 +176,192 @@ def read_cids(cid_list_file):
         rtn.append(line.strip())
 
     return rtn
+
+
+@click.command()
+@click.option('--series',
+              type=click.Choice(['trusty']),
+              default='trusty',
+              help='Which series including its point releases.')
+@click.option('--office',
+              type=click.Choice(['taipei-office', 'canonical']),
+              default='taipei-office',
+              help='Where the CID comes from.')
+@click.option('--verbose/--no-verbose',
+              default=True,
+              help='Output the query result in simple format')
+@click.option('--cache/--no-cache',
+              default=True,
+              help='Try to use cache or not')
+def eol(series, office, verbose, cache):
+    """
+    Find out all EOL CIDs
+
+    The algorithm to find out the EOL CIDs is based on the above query and
+    location commands.
+
+    For EOL we do the following steps:
+        1. Query CIDs according to location with the "location command"
+        2. According to the CIDs above to filter the certificate and
+        enablement status
+
+    TODO:
+        1. merge duplicate CIDs
+        2. make sure this CID is not enabled with higher series
+
+    :param certificate: series including their point releases
+    :param location: location string
+    :return: None
+    """
+    logger.info("Begin to execute.")
+
+    cache_prefix = 'eol-' + series
+    if cache:
+        logging.info('Try to use eol cache data...')
+        cid_cert_objs = c3cache.read_cache(cache_prefix)
+        if not cid_cert_objs:
+            cid_cert_objs = get_eol_cid_objs(series, office)
+            c3cache.write_cache(cache_prefix, cid_cert_objs)
+
+    else:
+        cid_cert_objs = get_eol_cid_objs(series, office)
+
+    if verbose:
+        if cache:
+            logging.info('Try to use eol cache data for verbose cids...')
+            verbose_cid_cert_objs = c3cache.read_cache('verbose-' + cache_prefix)
+            if not verbose_cid_cert_objs:
+                verbose_cid_cert_objs = get_verbose_eol_cid_objs(cid_cert_objs)
+                c3cache.write_cache('verbose-' + cache_prefix,
+                                    verbose_cid_cert_objs)
+        else:
+            verbose_cid_cert_objs = get_verbose_eol_cid_objs(cid_cert_objs)
+
+        c3csv.generate_csv(verbose_cid_cert_objs,
+                           'EOL-CIDs.csv',
+                           mode='eol-verbose')
+    else:
+        c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+
+
+def get_verbose_eol_cid_objs(cid_cert_objs):
+    verbose_cid_cert_objs = []
+    total_num = len(cid_cert_objs)
+    counter = 1
+    for cid_cert_obj in cid_cert_objs:
+        cid_obj = c3cid.CID()
+        cid_obj.cid = cid_cert_obj['cid']
+        msg_template = "Fetching data of {}: {} out of {}"
+        logging.info(msg_template.format(cid_obj.cid,
+                                         counter,
+                                         total_num))
+
+        cid_obj.location = cid_cert_obj['location']
+        cid_obj.release = cid_cert_obj['release']
+        cid_obj.level = cid_cert_obj['level']
+        cid_obj.status = cid_cert_obj['status']
+        cid_obj.cert = cid_cert_obj['cert']
+
+        result = c3query.query_over_api_hardware(cid_cert_obj['cid'])
+        cid_obj.make = result['platform']['vendor']['name']
+        cid_obj.model = result['platform']['name']
+        cid_obj.codename = result['platform']['codename']
+        cid_obj.form_factor = result['platform']['form_factor']
+
+        verbose_cid_cert_objs.append(cid_obj)
+
+        counter += 1
+
+    return verbose_cid_cert_objs
+
+
+def get_eol_cid_objs(series, office):
+
+    releases = c3maptable.series_eol[series]
+    locations = c3maptable.office[office]
+
+    uniq_cid_set = set()
+    cid_cert_objs = []
+    for location in locations:
+
+        summaries = c3cids.get_certificates_by_location(location,
+                                                        use_cache=False)
+
+        for summary in summaries:
+            if is_eol(summary, releases, c3maptable.series_alive):
+                cid = summary['machine'].split('/')[-2]
+                release = summary['release']['release']
+                level = summary['level']
+                status = summary['status']
+                logger.info('{} {} {} {} {}'.format(location,
+                                                    cid,
+                                                    release,
+                                                    level,
+                                                    status))
+                cid_cert_obj = {'cid': cid,
+                                'location': location,
+                                'release': release,
+                                'level': level,
+                                'status': status}
+
+                cid_cert_objs.append(cid_cert_obj)
+
+                uniq_cid_set.add(cid)
+
+    cid_cert_objs_new = []
+    for cid in uniq_cid_set:
+        cid_cert_obj_new = {}
+        for cid_cert_obj in cid_cert_objs:
+            if cid_cert_obj['cid'] == cid:
+                if cid_cert_obj_new:
+                    # sanity check
+                    _merge_cid_cert_obj_sanity_check(cid_cert_obj,
+                                                     cid_cert_obj_new)
+
+                    label_orig = _get_label(cid_cert_obj)
+                    label_new = cid_cert_obj_new['cert']
+                    if label_orig not in label_new:
+                        label_merge = label_new + ' - ' + label_orig
+                        cid_cert_obj_new['cert'] = label_merge
+
+                else:
+                    cid_cert_obj_new = {'cid': cid_cert_obj['cid'],
+                                        'location': cid_cert_obj['location'],
+                                        'cert': _get_label(cid_cert_obj),
+                                        'release': cid_cert_obj['release'],
+                                        'level': cid_cert_obj['level'],
+                                        'status': cid_cert_obj['status']}
+
+        cid_cert_objs_new.append(cid_cert_obj_new)
+
+    return cid_cert_objs_new
+
+
+def is_eol(summary, releases_eol, releases_alive):
+    cid = summary['machine'].split('/')[-2]
+    release = summary['release']['release']
+    if release in releases_eol:
+        if release in releases_alive:
+            logging.info("{} has {} certificate".format(cid, release))
+            return False
+        else:
+            return True
+    else:
+        return False
+
+
+def _get_label(cid_cert_obj):
+    label = cid_cert_obj['release'] + \
+            ' ( ' + \
+            cid_cert_obj['level'] + ' - ' + \
+            cid_cert_obj['status'] + \
+            ' )'
+    return label
+
+
+def _merge_cid_cert_obj_sanity_check(base, target):
+    if base['location'] != target['location'] or \
+       base['cid'] != target['cid']:
+        print("{} {} {} {}".format(base['location'], target['location'],
+                                   base['cid'], target['cid']))
+        raise

@@ -24,6 +24,7 @@ configuration = c3.config.Configuration.get_instance()
 api_instance = c3api.API.get_instance()
 
 
+# TODO: oh my god I did not use this function at all in this project?!
 def get_cid_from_cert_lot_result(result):
     """
     Get CID from a certificate-by-location query result.
@@ -40,7 +41,7 @@ def get_cid_from_cert_lot_result(result):
 
 
 
-def get_certificates_by_location(location='Taipei'):
+def get_certificates_by_location(location='Taipei', use_cache=True):
     """
     Get certificate information and the associated information by location api.
 
@@ -49,7 +50,7 @@ def get_certificates_by_location(location='Taipei'):
     """
     pickle_fn = location.lower() + '.cert_by_location.pickle'
 
-    if configuration.config['GENERAL']['cache']:
+    if configuration.config['GENERAL']['cache'] and use_cache:
         logger.info('Trying to find cache to get certificates by location.')
 
         try:
@@ -69,10 +70,11 @@ def get_certificates_by_location(location='Taipei'):
     else:
         results = c3q.query_certificates_by_location(location)
 
-        with open(pickle_fn, 'wb') as handle:
-            cache_path = os.path.realpath(handle.name)
-            logger.info('Save cache at {}'.format(cache_path))
-            pickle.dump(results, handle)
+        if configuration.config['GENERAL']['cache'] and use_cache:
+            with open(pickle_fn, 'wb') as handle:
+                cache_path = os.path.realpath(handle.name)
+                logger.info('Save cache at {}'.format(cache_path))
+                pickle.dump(results, handle)
 
     return results
 
@@ -114,7 +116,9 @@ def has_same_len(base, target):
 
 
 def get_cids_by_query(location, certificate, enablement, status,
-                      target_cids=[], disable_flag=True):
+                      target_cids=[], disable_flag=True,
+                      use_cache=False,
+                      filter_kernel=False):
     """
     Get cid objects by c3 query.
 
@@ -123,7 +127,9 @@ def get_cids_by_query(location, certificate, enablement, status,
     :param enablement: enablement status
     :param status: certification status
     :param target_cids: mutually exculsive option of disable_flag
-    :param disable_flag: mutually exculsive option of disable_flag
+    :param disable_flag: mutually exculsive option of target_cids
+    :param use_cache: if read and write pickle files
+    :param filter_kernel: if enable the filter by kernel
     :return: cid objects in a list
     """
     # return cid objects
@@ -136,7 +142,8 @@ def get_cids_by_query(location, certificate, enablement, status,
             # lcts: locations
             summaries_not_merge_lcts = []
             for location_entry in c3.maptable.location:
-                summaries_entry = get_certificates_by_location(location_entry)
+                summaries_entry = get_certificates_by_location(location_entry,
+                                                               use_cache=use_cache)
                 summaries_not_merge.append(summaries_entry)
 
                 entry_locations = [location_entry] * len(summaries_entry)
@@ -150,7 +157,8 @@ def get_cids_by_query(location, certificate, enablement, status,
                 raise Exception
 
         else:
-            summaries = get_certificates_by_location(location)
+            summaries = get_certificates_by_location(location,
+                                                     use_cache=use_cache)
             summaries_location = ['location']*len(summaries)
 
         logger.debug('Get certificate-location result per CIDs')
@@ -163,7 +171,7 @@ def get_cids_by_query(location, certificate, enablement, status,
                     logger.warning('This certificate has no submission.')
                 else:
                     if cid_id in target_cids or disable_flag:
-                        print("Fetching data for %s" % cid_id)
+                        print("Fetching data for {}".format(cid_id))
 
                         submission_id = summary['report'].split('/')[-2]
                         # TODO: use query_specific_submission instead
@@ -174,19 +182,23 @@ def get_cids_by_query(location, certificate, enablement, status,
                         cid_location = summaries_location[location_index]
                         cid_obj.__dict__.update(location=cid_location)
 
-                        # TODO: a workaround to filter kernel criteria
-                        try:
-                            filter_kernel = \
-                                configuration.config['FILTER']['kernel']
-                        except KeyError:
-                            filter_kernel = ''
+                        if filter_kernel:
+                            logging.info('Enable kernel version filter')
+                            # TODO: a workaround to filter kernel criteria
+                            try:
+                                filter_kernel = \
+                                    configuration.config['FILTER']['kernel']
+                            except KeyError:
+                                filter_kernel = ''
 
-                        filter_keywords = filter_kernel.split('-')
-                        if filter_kernel and \
-                           is_kernel_match_filter(filter_keywords, cid_obj.kernel):
-                            cids.append(cid_obj)
-                        elif filter_kernel:
-                            logger.warning('Skip as a workaround.')
+                            filter_keywords = filter_kernel.split('-')
+                            if filter_kernel and \
+                               is_kernel_match_filter(filter_keywords, cid_obj.kernel):
+                                cids.append(cid_obj)
+                            elif filter_kernel:
+                                logger.warning('Skip as a workaround.')
+                            else:
+                                cids.append(cid_obj)
                         else:
                             cids.append(cid_obj)
 
@@ -198,7 +210,11 @@ def get_cids_by_query(location, certificate, enablement, status,
     return cids
 
 
-def get_cids(location, certificate, enablement, status, cache_prefix='cids'):
+def get_cids(location, certificate, enablement, status,
+             cache_prefix='cids',
+             target_cids=[], disable_flag=True,
+             use_cache=False,
+             filter_kernel=False):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
@@ -208,14 +224,21 @@ def get_cids(location, certificate, enablement, status, cache_prefix='cids'):
 
     logger.debug('logger begins to debug')
 
+    cids_cache = []
     # Use cache is possible
-    cids_cache = c3cache.read_cache(cache_prefix)
+    if use_cache:
+        cids_cache = c3cache.read_cache(cache_prefix)
+
     if cids_cache:
         print("Found cids cache. Use it.")
         cids = cids_cache
     else:
         cids = get_cids_by_query(location, certificate, enablement, status,
-                                 disable_flag=True)
-        c3cache.write_cache("cids", cids)
+                                 target_cids=target_cids,
+                                 disable_flag=disable_flag,
+                                 use_cache=use_cache,
+                                 filter_kernel=filter_kernel)
+        if use_cache:
+            c3cache.write_cache("cids", cids)
 
     return cids
