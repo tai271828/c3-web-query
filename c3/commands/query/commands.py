@@ -1,5 +1,6 @@
 import click
 import logging
+import c3.pool.cid as c3cid
 import c3.api.cids as c3cids
 import c3.api.query as c3query
 import c3.io.cache as c3cache
@@ -226,9 +227,39 @@ def eol(series, office, verbose, cache):
         cid_cert_objs = get_eol_cid_objs(series, office)
 
     if verbose:
-        c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+        if cache:
+            logging.info('Try to use eol cache data for verbose cids...')
+            verbose_cid_cert_objs = c3cache.read_cache('verbose-' + cache_prefix)
+            if not verbose_cid_cert_objs:
+                verbose_cid_cert_objs = get_verbose_eol_cid_objs(cid_cert_objs)
+                c3cache.write_cache('verbose-' + cache_prefix,
+                                    verbose_cid_cert_objs)
+        else:
+            verbose_cid_cert_objs = get_verbose_eol_cid_objs(cid_cert_objs)
+
+        c3csv.generate_csv(verbose_cid_cert_objs,
+                           'EOL-CIDs.csv',
+                           mode='eol-verbose')
     else:
         c3csv.generate_csv(cid_cert_objs, 'EOL-CIDs.csv', mode='eol')
+
+
+def get_verbose_eol_cid_objs(cid_cert_objs):
+    verbose_cid_cert_objs = []
+    for cid_cert_obj in cid_cert_objs:
+        cids_data = c3cids.get_cids_by_query(cid_cert_obj['location'],
+                                             cid_cert_obj['release'],
+                                             cid_cert_obj['level'],
+                                             cid_cert_obj['status'],
+                                             target_cids=[
+                                                 cid_cert_obj['cid']],
+                                             disable_flag=False,
+                                             use_cache=False)
+        for cid_data in cids_data:
+            cid_data.__dict__.update(cert=cid_cert_obj['cert'])
+            verbose_cid_cert_objs.append(cid_data)
+
+    return verbose_cid_cert_objs
 
 
 def get_eol_cid_objs(series, office):
@@ -281,10 +312,12 @@ def get_eol_cid_objs(series, office):
                         cid_cert_obj_new['cert'] = label_merge
 
                 else:
-
                     cid_cert_obj_new = {'cid': cid_cert_obj['cid'],
                                         'location': cid_cert_obj['location'],
-                                        'cert': _get_label(cid_cert_obj)}
+                                        'cert': _get_label(cid_cert_obj),
+                                        'release': cid_cert_obj['release'],
+                                        'level': cid_cert_obj['level'],
+                                        'status': cid_cert_obj['status']}
 
         cid_cert_objs_new.append(cid_cert_obj_new)
 
@@ -305,7 +338,7 @@ def is_eol(summary, releases_eol, releases_alive):
 
 def _get_label(cid_cert_obj):
     label = cid_cert_obj['release'] + \
-            '( ' + \
+            ' ( ' + \
             cid_cert_obj['level'] + ' - ' + \
             cid_cert_obj['status'] + \
             ' )'

@@ -64,6 +64,26 @@ def generate_csv_row_eol(cid, writer):
                          'Cert Type': ""})
 
 
+def generate_csv_row_eol_verbose(cid, writer):
+    if cid:
+        try:
+            writer.writerow({'CID': cid.cid,
+                             'Location': cid.location,
+                             'Vendor': cid.make,
+                             'Model': cid.model,
+                             'Code Name': cid.codename,
+                             'Form': cid.form_factor,
+                             'Cert Type': cid.cert
+                             })
+        except AttributeError:
+            raise
+    else:
+        logger.warning("No data for {}".format(cid))
+        writer.writerow({'CID': cid['cid'],
+                         'Location': "",
+                         'Cert Type': ""})
+
+
 def get_fieldnames(mode='submission'):
     if mode == 'submission':
         fieldnames = ['CID',
@@ -75,6 +95,10 @@ def get_fieldnames(mode='submission'):
     elif mode == 'eol':
         fieldnames = ['CID',
                       'Location',
+                      'Cert Type']
+    elif mode == 'eol-verbose':
+        fieldnames = ['CID', 'Location',
+                      'Vendor', 'Model', 'Code Name', 'Form',
                       'Cert Type']
     else:
         fieldnames = ""
@@ -100,6 +124,9 @@ def generate_csv(cids, csv_file, mode='submission'):
         elif mode == 'eol':
             for cid in cids:
                 generate_csv_row_eol(cid, writer)
+        elif mode == 'eol-verbose':
+            for cid in cids:
+                generate_csv_row_eol_verbose(cid, writer)
         else:
             for cid in cids:
                 generate_csv_row(cid, writer)

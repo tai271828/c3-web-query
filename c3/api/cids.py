@@ -117,8 +117,8 @@ def has_same_len(base, target):
 
 def get_cids_by_query(location, certificate, enablement, status,
                       target_cids=[], disable_flag=True,
-                      use_cache=True,
-                      filter_kernel=True):
+                      use_cache=False,
+                      filter_kernel=False):
     """
     Get cid objects by c3 query.
 
@@ -183,6 +183,7 @@ def get_cids_by_query(location, certificate, enablement, status,
                         cid_obj.__dict__.update(location=cid_location)
 
                         if filter_kernel:
+                            logging.info('Enable kernel version filter')
                             # TODO: a workaround to filter kernel criteria
                             try:
                                 filter_kernel = \
@@ -209,9 +210,11 @@ def get_cids_by_query(location, certificate, enablement, status,
     return cids
 
 
-def get_cids(location, certificate, enablement, status, cache_prefix='cids',
-             use_cache=True,
-             filter_kernel=True):
+def get_cids(location, certificate, enablement, status,
+             cache_prefix='cids',
+             target_cids=[], disable_flag=True,
+             use_cache=False,
+             filter_kernel=False):
     global request_params, api
     api = api_instance.api
     request_params = api_instance.request_params
@@ -231,7 +234,8 @@ def get_cids(location, certificate, enablement, status, cache_prefix='cids',
         cids = cids_cache
     else:
         cids = get_cids_by_query(location, certificate, enablement, status,
-                                 disable_flag=True,
+                                 target_cids=target_cids,
+                                 disable_flag=disable_flag,
                                  use_cache=use_cache,
                                  filter_kernel=filter_kernel)
         if use_cache:
