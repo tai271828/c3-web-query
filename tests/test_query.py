@@ -34,7 +34,7 @@ def check_internet_connection(host="8.8.8.8", port=53, timeout=3):
 
 def test_query():
     # this test needs c3 database connection
-    if not check_internet_connection(host="10.101.48.254"):
+    if not check_internet_connection():
         pytest.skip("Skip for no available network connection")
 
     configuration.read_configuration(ini_test.name)
