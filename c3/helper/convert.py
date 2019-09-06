@@ -19,10 +19,8 @@ def cid_obj_to_dict_cids(cids):
     rtn_cids = {}
     for cid in cids:
         cid_id = cid.cid
-        rtn_cids[cid_id] = []
+        rtn_cids[cid_id] = {}
         for attr in ma:
-            attr_element = {}
-            attr_element[attr] = getattr(cid, attr)
-            rtn_cids[cid_id].append(attr_element)
+            rtn_cids[cid_id][attr] = getattr(cid, attr)
 
     return rtn_cids
