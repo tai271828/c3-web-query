@@ -3,7 +3,7 @@ Pool entry data model. It's a CID most of the time.
 """
 import c3.json.component as c3component
 import c3.api.query as c3query
-
+from pprint import pprint
 
 class CID(object):
 
@@ -24,3 +24,7 @@ def get_cid_from_submission(submission_id):
     cid.__dict__.update(**device_audio)
 
     return cid
+
+
+def dump_cid_obj(cid_obj):
+    pprint(vars(cid_obj))

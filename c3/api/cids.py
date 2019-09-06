@@ -9,6 +9,7 @@ import c3.config
 import pickle
 import logging
 import pandas as pd
+import collections
 import c3.maptable
 import c3.config as c3config
 import c3.io.cache as c3cache
@@ -208,6 +209,46 @@ def get_cids_by_query(location, certificate, enablement, status,
         logger.critical("Problem with C3 Query")
 
     return cids
+
+
+def sanity_check(cid_objs):
+    # TODO: This is a very bad way to sanity check the data
+    # because it will drop the raw data
+    #
+    # make sure there is no duplicate entry
+    cid_ids = []
+    cid_objs_sorted = []
+    for cid_obj in cid_objs:
+        cid_ids.append(cid_obj.cid)
+
+    duplicate_cids = []
+    unique_cids = []
+    for item, count in collections.Counter(cid_ids).items():
+        if count > 1:
+            duplicate_cids.append(item)
+        else:
+            unique_cids.append(item)
+
+    cid_objs_duplicate_only = []
+    for dcid in duplicate_cids:
+        for cid_obj in cid_objs:
+            if cid_obj.cid == dcid:
+                cid_objs_duplicate_only.append(cid_obj)
+                break
+
+    cid_objs_unique_only = []
+    for ucid in unique_cids:
+        for cid_obj in cid_objs:
+            if cid_obj.cid == ucid:
+                cid_objs_unique_only.append(cid_obj)
+
+    cid_objs_unique_cid = []
+    cid_objs_unique_cid.extend(cid_objs_unique_only)
+    if cid_objs_duplicate_only:
+        cid_objs_unique_cid.extend(cid_objs_duplicate_only)
+    cid_objs = cid_objs_unique_cid
+
+    return cid_objs
 
 
 def get_cids(location, certificate, enablement, status,

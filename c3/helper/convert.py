@@ -9,7 +9,8 @@ def dict_to_cid_obj_cids(cids):
     rtn_cids = []
     for cid in cids:
         cid_obj = CID(cid=cid)
-        for attr_map in cids[cid]:
+        for attr_map_key in cids[cid]:
+            attr_map = {attr_map_key: cids[cid][attr_map_key]}
             cid_obj.__dict__.update(**attr_map)
         rtn_cids.append(cid_obj)
 

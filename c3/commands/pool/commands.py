@@ -53,7 +53,10 @@ def create(location, certificate, enablement, status,
     """
     Create a test pool by given categories.
     """
-    cid_objs = cids.get_cids(location, certificate, enablement, status)
+    cid_objs = cids.get_cids(location, certificate, enablement, status,
+                             use_cache=True)
+
+    cid_objs = cids.sanity_check(cid_objs)
 
     csv_fn = location + '-' + certificate + '-' + enablement + '-' + status
     csv_fn_prefix = csv_fn.replace(' ', '')
