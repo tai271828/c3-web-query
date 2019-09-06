@@ -5,6 +5,7 @@ import c3.json.component as c3component
 import c3.api.query as c3query
 from pprint import pprint
 
+
 class CID(object):
 
     def __init__(self, **kwargs):
