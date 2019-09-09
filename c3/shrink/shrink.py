@@ -352,3 +352,17 @@ def get_pool(cid_objs):
                                           filter_session.getboolean('ifamily'))
 
     return cid_objs_shrunk
+
+
+def get_pool_not_select(cid_objs, cid_objs_shrank):
+    cid_objs_rtn = []
+    for cid_obj in cid_objs:
+        flag = False
+        for cid_obj_shrank in cid_objs_shrank:
+            if cid_obj.cid == cid_obj_shrank.cid:
+                flag = True
+                break
+        if not flag:
+            cid_objs_rtn.append(cid_obj)
+
+    return cid_objs_rtn

@@ -42,14 +42,19 @@ def create_prototype(algorithm, certificate):
               help='Certificate status')
 @click.option('--csv-before-shrink',
               default=True,
-              help='If to output csv file with name'
+              help='If true to output csv file with name'
               'location-certificate-enablement-status-before-shrink.csv')
 @click.option('--csv-after-shrink',
               default=True,
-              help='If to output csv file with name'
+              help='If true to output csv file with name'
               'location-certificate-enablement-status-after-shrink.csv')
+@click.option('--csv-after-shrink-not-selected',
+              default=True,
+              help='If true to output csv file with name'
+              'location-certificate-enablement-status-after-shrink-'
+              'not-selected.csv')
 def create(location, certificate, enablement, status,
-           csv_before_shrink, csv_after_shrink):
+           csv_before_shrink, csv_after_shrink, csv_after_shrink_not_selected):
     """
     Create a test pool by given categories.
     """
@@ -70,3 +75,12 @@ def create(location, certificate, enablement, status,
 
     if csv_after_shrink:
         c3csv.generate_csv(cid_objs_shrank, csv_fn_output_shrank)
+
+    cid_objs_shrank_not_selected = shrink.get_pool_not_select(cid_objs,
+                                                              cid_objs_shrank)
+    suffix = '-after-shrink-not-selected.csv'
+    csv_fn_output_shrank_not_selected = csv_fn_prefix + suffix
+
+    if csv_after_shrink_not_selected:
+        c3csv.generate_csv(cid_objs_shrank_not_selected,
+                           csv_fn_output_shrank_not_selected)
