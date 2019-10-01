@@ -308,6 +308,17 @@ def get_eol_cid_objs(series, office):
 
                 uniq_cid_set.add(cid)
 
+    # check if any cid object has higher series certificated
+    for cid_obj in cid_cert_objs:
+        if cid_obj['release'] in c3maptable.series_alive:
+            print('{} has certificate {}'.format(cid_obj['cid'],
+                                                 cid_obj['release']))
+            raise
+
+    # there might be one config/sku certified with different series
+    # we need to merge all certificate in one cell and make sure:
+    #    1. there is only 1 CID certified with the target series
+    #    2. the CID is not certified with higher series
     cid_cert_objs_new = []
     for cid in uniq_cid_set:
         cid_cert_obj_new = {}
@@ -317,7 +328,7 @@ def get_eol_cid_objs(series, office):
                     # sanity check
                     _merge_cid_cert_obj_sanity_check(cid_cert_obj,
                                                      cid_cert_obj_new)
-
+                    # merge certificates if there are multiple certs
                     label_orig = _get_label(cid_cert_obj)
                     label_new = cid_cert_obj_new['cert']
                     if label_orig not in label_new:
@@ -333,6 +344,14 @@ def get_eol_cid_objs(series, office):
                                         'status': cid_cert_obj['status']}
 
         cid_cert_objs_new.append(cid_cert_obj_new)
+
+    # more sanity check to make sure we did not add none-eol series
+    for release in c3maptable.series_alive:
+        for cid_cert_obj in cid_cert_objs_new:
+            if release in cid_cert_obj['cert']:
+                print('{} has certificate {}'.format(cid_cert_obj['cid'],
+                                                     cid_cert_obj['cert']))
+                raise
 
     return cid_cert_objs_new
 
