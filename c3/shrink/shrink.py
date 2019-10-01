@@ -366,3 +366,12 @@ def get_pool_not_select(cid_objs, cid_objs_shrank):
             cid_objs_rtn.append(cid_obj)
 
     return cid_objs_rtn
+
+
+def reserve_certlab_only(cid_objs):
+    cid_objs_new = []
+    for cid_obj in cid_objs:
+        if cid_obj.location == "cert-taipei":
+            cid_objs_new.append(cid_obj)
+
+    return cid_objs_new

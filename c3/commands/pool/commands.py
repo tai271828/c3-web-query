@@ -81,6 +81,16 @@ def create(location, certificate, enablement, status,
     suffix = '-after-shrink-not-selected.csv'
     csv_fn_output_shrank_not_selected = csv_fn_prefix + suffix
 
+    cosns = cid_objs_shrank_not_selected
+    cosns_certlab_only = shrink.reserve_certlab_only(cosns)
+    cid_objs_shrank_not_selected_certlab_only = cosns_certlab_only
+    suffix_certlab_only = '-after-shrink-not-selected-certlab-only.csv'
+    csv_fn_output_shrank_not_selected_certlab_only = csv_fn_prefix + \
+                                                     suffix_certlab_only
+
     if csv_after_shrink_not_selected:
         c3csv.generate_csv(cid_objs_shrank_not_selected,
                            csv_fn_output_shrank_not_selected)
+
+        c3csv.generate_csv(cid_objs_shrank_not_selected_certlab_only,
+                           csv_fn_output_shrank_not_selected_certlab_only)
