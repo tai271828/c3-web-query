@@ -35,7 +35,7 @@ c3query.query_holder_location('201605-22027')
 Change the holder and location status by the subcommand `location`. If the field `holder` and `localtion` are provided, the query mode will automatically switch to change mode. Please note by default the `status` is *as is* if not assigned.
 
 ```
-$ c3-cli --conf my_conf.ini location --holder taihsiangho --location taipei --cid 201610-25147
+$ c3-cli --conf my_conf.ini location --holder taihsiangho --location cert-taipei --cid 201610-25147
 ```
 
 A useful short name is `eol` for you to change the holder/location/status to be `AsIs/OEM/Returned to partner/customer`.

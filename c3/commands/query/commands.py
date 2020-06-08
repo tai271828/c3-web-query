@@ -68,9 +68,9 @@ def query(cid, cid_list, csv, certificate, enablement, status):
 @click.option('--holder',
               help='To be holder. Use Launchpad ID.')
 @click.option('--location',
-              type=click.Choice(['taipei', 'beijing', 'lexington', 'ceqa',
+              type=click.Choice(['cert-taipei', 'beijing', 'lexington', 'ceqa',
                                  'oem']),
-              default='taipei',
+              default='cert-taipei',
               help='Change to location')
 @click.option('--status',
               type=click.Choice(['return', 'canonical']),
@@ -132,10 +132,10 @@ def query_location_holder(cids, verbose=False):
             c3query.query_holder_location(ctc)
         if verbose:
             print('====== CID %s ======' % ctc)
+            print('Current platform name: %s' % platform_name)
             print('Current location: %s' % location_asis)
             print('Current holder: %s' % holder_asis)
             print('Current status: %s' % status_asis)
-            print('Current platform name: %s' % platform_name)
         else:
             print('{}, {}, {}, {}'.format(ctc, platform_name,
                                        location_asis, holder_asis))
@@ -147,6 +147,7 @@ def change_location_holder(cids, location, holder, status):
         holder_asis, location_asis, status_asis, platform_name = \
             c3query.query_holder_location(ctc)
         print('============ CID %s ============' % ctc)
+        print('Current platform name: %s' % platform_name)
         print('Current location: %s' % location_asis)
         print('Current holder: %s' % holder_asis)
         print('Current status: %s' % status_asis)
